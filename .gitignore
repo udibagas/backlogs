@@ -6,6 +6,5 @@ dist
 .nuxt
 .output
 coverage
-apps/api/src/generated
 *.log
 .DS_Store
