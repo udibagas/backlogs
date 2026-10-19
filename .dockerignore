@@ -1,0 +1,15 @@
+.git
+**/.git
+node_modules
+**/node_modules
+**/.nuxt
+**/.output
+**/dist
+**/coverage
+apps/api/src/generated
+**/*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+npm-debug.log*

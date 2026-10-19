@@ -1,0 +1,383 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum ProjectRole {
+  MANAGER
+  PRODUCT_OWNER
+  SCRUM_MASTER
+  DEVELOPER
+  VIEWER
+}
+
+enum Methodology {
+  SCRUM
+  KANBAN
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum BacklogType {
+  EPIC
+  USER_STORY
+  BUG
+  TECHNICAL_TASK
+  SPIKE
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum BacklogStatus {
+  BACKLOG
+  READY
+  IN_PROGRESS
+  IN_REVIEW
+  TESTING
+  DONE
+}
+
+enum SprintStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  TESTING
+  DONE
+  BLOCKED
+}
+
+enum SprintEventType {
+  PLANNING
+  DAILY_SCRUM
+  REVIEW
+  RETROSPECTIVE
+}
+
+model User {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  email                   String                   @unique
+  name                    String
+  passwordHash            String
+  active                  Boolean                  @default(true)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  organizationMemberships OrganizationMembership[]
+  projectMemberships      ProjectMembership[]
+  refreshSessions         RefreshSession[]
+  reportedItems           BacklogItem[]            @relation("ItemReporter")
+  assignedItems           BacklogItem[]            @relation("ItemAssignee")
+  reportedTasks           Task[]                   @relation("TaskReporter")
+  assignedTasks           Task[]                   @relation("TaskAssignee")
+  comments                Comment[]
+  activities              Activity[]
+}
+
+model RefreshSession {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model Organization {
+  id          String                   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String                   @unique
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  memberships OrganizationMembership[]
+  projects    Project[]
+}
+
+model OrganizationMembership {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  userId         String           @db.Uuid
+  role           OrganizationRole @default(MEMBER)
+  createdAt      DateTime         @default(now())
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Project {
+  id                    String              @id @default(uuid()) @db.Uuid
+  organizationId        String              @db.Uuid
+  name                  String
+  key                   String
+  description           String              @default("")
+  methodology           Methodology         @default(SCRUM)
+  status                ProjectStatus       @default(ACTIVE)
+  defaultSprintDuration Int                 @default(14)
+  nextItemNumber        Int                 @default(0)
+  concurrencyVersion    Int              @default(0)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  organization          Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  memberships           ProjectMembership[]
+  backlogItems          BacklogItem[]
+  sprints               Sprint[]
+  tasks                 Task[]
+  workflowColumns       WorkflowColumn[]
+  comments              Comment[]
+  activities            Activity[]
+
+  @@unique([organizationId, key])
+  @@index([organizationId, status])
+}
+
+model ProjectMembership {
+  id        String      @id @default(uuid()) @db.Uuid
+  projectId String      @db.Uuid
+  userId    String      @db.Uuid
+  role      ProjectRole @default(DEVELOPER)
+  createdAt DateTime    @default(now())
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+}
+
+model BacklogItem {
+  id              String                @id @default(uuid()) @db.Uuid
+  projectId       String                @db.Uuid
+  itemNumber      Int
+  title           String
+  description     String                @default("")
+  type            BacklogType
+  priority        Priority              @default(MEDIUM)
+  status          BacklogStatus         @default(BACKLOG)
+  storyRole       String?
+  storyCapability String?
+  storyBenefit    String?
+  businessValue   Int?
+  estimate        Float?
+  labels          String[]              @default([])
+  dueDate         DateTime?
+  archivedAt      DateTime?
+  parentId        String?               @db.Uuid
+  reporterId      String                @db.Uuid
+  assigneeId      String?               @db.Uuid
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  project         Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent          BacklogItem?          @relation("ItemHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children        BacklogItem[]         @relation("ItemHierarchy")
+  reporter        User                  @relation("ItemReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  assignee        User?                 @relation("ItemAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  criteria        AcceptanceCriterion[]
+  dependencies    BacklogDependency[]   @relation("DependencySource")
+  dependedOnBy    BacklogDependency[]   @relation("DependencyTarget")
+  sprintItems     SprintItem[]
+  tasks           Task[]
+  comments        Comment[]
+
+  @@unique([projectId, itemNumber])
+  @@index([projectId, status, priority])
+  @@index([projectId, type])
+  @@index([assigneeId])
+}
+
+model AcceptanceCriterion {
+  id            String      @id @default(uuid()) @db.Uuid
+  backlogItemId String      @db.Uuid
+  description   String
+  order         Int         @default(0)
+  completed     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  backlogItem   BacklogItem @relation(fields: [backlogItemId], references: [id], onDelete: Cascade)
+
+  @@index([backlogItemId, order])
+}
+
+model BacklogDependency {
+  itemId      String      @db.Uuid
+  dependsOnId String      @db.Uuid
+  createdAt   DateTime    @default(now())
+  item        BacklogItem @relation("DependencySource", fields: [itemId], references: [id], onDelete: Cascade)
+  dependsOn   BacklogItem @relation("DependencyTarget", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, dependsOnId])
+  @@index([dependsOnId])
+}
+
+model Sprint {
+  id          String                @id @default(uuid()) @db.Uuid
+  projectId   String                @db.Uuid
+  name        String
+  goal        String                @default("")
+  status      SprintStatus          @default(PLANNING)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  completedAt DateTime?
+  outcome     String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  project     Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items       SprintItem[]
+  tasks       Task[]
+  events      SprintEvent[]
+  actions     RetrospectiveAction[]
+
+  @@index([projectId, status])
+}
+
+model SprintItem {
+  id            String      @id @default(uuid()) @db.Uuid
+  sprintId      String      @db.Uuid
+  backlogItemId String      @db.Uuid
+  addedAt       DateTime    @default(now())
+  sprint        Sprint      @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  backlogItem   BacklogItem @relation(fields: [backlogItemId], references: [id], onDelete: Cascade)
+
+  @@unique([sprintId, backlogItemId])
+  @@index([backlogItemId])
+}
+
+model Task {
+  id            String           @id @default(uuid()) @db.Uuid
+  projectId     String           @db.Uuid
+  backlogItemId String?          @db.Uuid
+  sprintId      String?          @db.Uuid
+  title         String
+  description   String           @default("")
+  status        TaskStatus       @default(TODO)
+  priority      Priority         @default(MEDIUM)
+  estimate      Float?
+  actualEffort  Float?
+  dueDate       DateTime?
+  completedAt   DateTime?
+  reporterId    String           @db.Uuid
+  assigneeId    String?          @db.Uuid
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  backlogItem   BacklogItem?     @relation(fields: [backlogItemId], references: [id], onDelete: SetNull)
+  sprint        Sprint?          @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  reporter      User             @relation("TaskReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  assignee      User?            @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  dependencies  TaskDependency[] @relation("TaskDependencySource")
+  dependedOnBy  TaskDependency[] @relation("TaskDependencyTarget")
+  comments      Comment[]
+
+  @@index([projectId, status])
+  @@index([backlogItemId])
+  @@index([sprintId])
+  @@index([assigneeId])
+}
+
+model TaskDependency {
+  taskId      String @db.Uuid
+  dependsOnId String @db.Uuid
+  task        Task   @relation("TaskDependencySource", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn   Task   @relation("TaskDependencyTarget", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, dependsOnId])
+}
+
+model WorkflowColumn {
+  id        String        @id @default(uuid()) @db.Uuid
+  projectId String        @db.Uuid
+  name      String
+  status    BacklogStatus
+  position  Int
+  wipLimit  Int?
+  hardLimit Boolean       @default(false)
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, status])
+  @@unique([projectId, position])
+}
+
+model Comment {
+  id            String       @id @default(uuid()) @db.Uuid
+  projectId     String       @db.Uuid
+  backlogItemId String?      @db.Uuid
+  taskId        String?      @db.Uuid
+  authorId      String       @db.Uuid
+  body          String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  backlogItem   BacklogItem? @relation(fields: [backlogItemId], references: [id], onDelete: Cascade)
+  task          Task?        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author        User         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+}
+
+model Activity {
+  id         String   @id @default(uuid()) @db.Uuid
+  projectId  String   @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String
+  entityType String
+  entityId   String   @db.Uuid
+  details    Json     @default("{}")
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model SprintEvent {
+  id       String          @id @default(uuid()) @db.Uuid
+  sprintId String          @db.Uuid
+  type     SprintEventType
+  startsAt DateTime
+  notes    String          @default("")
+  feedback String          @default("")
+  sprint   Sprint          @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+
+  @@index([sprintId, startsAt])
+}
+
+model RetrospectiveAction {
+  id          String    @id @default(uuid()) @db.Uuid
+  sprintId    String    @db.Uuid
+  description String
+  assigneeId  String?   @db.Uuid
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  sprint      Sprint    @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+
+  @@index([sprintId])
+}

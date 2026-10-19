@@ -1,0 +1,10 @@
+packages:
+  - apps/api
+  - apps/web
+minimumReleaseAgeExclude:
+  - '@nestjs/core@12.2.0'
+  - '@nestjs/platform-express@12.2.0'
+  - '@nuxt/devtools-kit@3.4.4'
+  - '@nuxt/devtools@3.4.4'
+  - browserslist@4.29.4
+  - nitropack@2.13.5

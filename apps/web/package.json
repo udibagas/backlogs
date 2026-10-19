@@ -1,0 +1,25 @@
+{
+  "name": "@agile/web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0",
+    "build": "nuxt build",
+    "preview": "nuxt preview --host 0.0.0.0",
+    "lint": "eslint .",
+    "typecheck": "nuxt prepare && vue-tsc --noEmit -p .nuxt/tsconfig.json"
+  },
+  "dependencies": {
+    "@element-plus/nuxt": "^1.1.5",
+    "element-plus": "^2.14.7",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "nuxt": "4.6.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.13"
+  }
+}
