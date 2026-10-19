@@ -1,7 +1,6 @@
 {
   "name": "agile-project-management",
   "private": true,
-  "packageManager": "pnpm@12.14.0",
   "engines": {
     "node": ">=22.22.3"
   },
