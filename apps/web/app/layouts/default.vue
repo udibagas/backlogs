@@ -42,11 +42,28 @@ async function logout() {
         <el-tag type="primary" effect="light" round>Workspace</el-tag>
       </div>
       <el-menu :default-active="activePath" router class="app-menu" aria-label="Main navigation">
-        <el-menu-item index="/">Dashboard</el-menu-item>
-        <el-menu-item index="/projects">Projects</el-menu-item>
-        <el-menu-item index="/organizations">Organizations</el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><el-icon-house /></el-icon>
+          Dashboard
+        </el-menu-item>
+        <el-menu-item index="/projects">
+          <el-icon><el-icon-folder /></el-icon>
+          Projects
+        </el-menu-item>
+        <el-menu-item index="/organizations">
+          <el-icon><el-icon-office-building /></el-icon>
+          Organizations
+        </el-menu-item>
         <el-menu-item-group v-if="projectLinks.length" title="Current project">
           <el-menu-item v-for="link in projectLinks" :key="link.to" :index="link.to">
+            <el-icon>
+              <el-icon-house v-if="link.label === 'Overview'" />
+              <el-icon-tickets v-else-if="link.label === 'Product backlog'" />
+              <el-icon-grid v-else-if="link.label === 'Kanban board'" />
+              <el-icon-calendar v-else-if="link.label === 'Sprints'" />
+              <el-icon-checked v-else-if="link.label === 'Tasks'" />
+              <el-icon-trend-charts v-else-if="link.label === 'Reports'" />
+            </el-icon>
             {{ link.label }}
           </el-menu-item>
         </el-menu-item-group>
