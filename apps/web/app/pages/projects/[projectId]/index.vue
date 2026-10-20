@@ -5,7 +5,14 @@ interface Project {
   key: string;
   description: string;
   methodology: string;
+  currentRole: string;
   organization: { name: string };
+}
+interface ProjectMember {
+  id: string;
+  userId: string;
+  role: string;
+  user: { id: string; name: string; email: string };
 }
 interface Report {
   backlogByStatus: { status: string; count: number }[];
@@ -28,24 +35,67 @@ interface Report {
   }[];
 }
 const route = useRoute();
-const { request } = useApi();
+const { request, currentUser } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const project = ref<Project | null>(null);
 const report = ref<Report | null>(null);
+const members = ref<ProjectMember[]>([]);
+const memberEmail = ref("");
+const memberRole = ref("DEVELOPER");
 const loading = ref(true);
+const memberPending = ref(false);
+const memberError = ref("");
 const errorMessage = ref("");
+const canManageMembers = computed(() =>
+  ["MANAGER", "PRODUCT_OWNER", "SCRUM_MASTER"].includes(project.value?.currentRole ?? "")
+);
 
 async function load() {
   loading.value = true;
   try {
-    [project.value, report.value] = await Promise.all([
+    [project.value, report.value, members.value] = await Promise.all([
       request<Project>(`/projects/${projectId.value}`),
-      request<Report>(`/projects/${projectId.value}/reports`)
+      request<Report>(`/projects/${projectId.value}/reports`),
+      request<ProjectMember[]>(`/projects/${projectId.value}/members`)
     ]);
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   } finally {
     loading.value = false;
+  }
+}
+async function addMember() {
+  memberError.value = "";
+  const email = memberEmail.value.trim();
+  if (!email) {
+    memberError.value = "Enter the email address of an existing account.";
+    return;
+  }
+  memberPending.value = true;
+  try {
+    await request<ProjectMember>(`/projects/${projectId.value}/members`, {
+      method: "POST",
+      body: { email, role: memberRole.value }
+    });
+    memberEmail.value = "";
+    members.value = await request<ProjectMember[]>(`/projects/${projectId.value}/members`);
+  } catch (error) {
+    memberError.value = useErrorMessage(error);
+  } finally {
+    memberPending.value = false;
+  }
+}
+async function removeMember(member: ProjectMember) {
+  memberError.value = "";
+  if (!window.confirm(`Remove ${member.user.name} from this project?`)) return;
+  memberPending.value = true;
+  try {
+    await request(`/projects/${projectId.value}/members/${member.userId}`, { method: "DELETE" });
+    members.value = members.value.filter((current) => current.id !== member.id);
+  } catch (error) {
+    memberError.value = useErrorMessage(error);
+  } finally {
+    memberPending.value = false;
   }
 }
 onMounted(load);
@@ -108,6 +158,68 @@ watch(projectId, load);
           </el-card>
         </el-col>
       </el-row>
+      <el-card shadow="never" class="mb-7">
+        <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="section-title">Project team</h2>
+            <p class="muted mt-1 text-sm">Collaborate with people on this project.</p>
+          </div>
+          <el-tag type="info">{{ members.length }} members</el-tag>
+        </div>
+        <el-alert v-if="memberError" :title="memberError" type="error" show-icon class="mb-4" />
+        <form
+          v-if="canManageMembers"
+          class="mb-5 flex flex-col gap-3 sm:flex-row"
+          @submit.prevent="addMember"
+        >
+          <el-input
+            v-model="memberEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="Add an existing user by email"
+            aria-label="Collaborator email"
+            class="flex-1"
+          />
+          <el-select v-model="memberRole" aria-label="Project role" class="sm:!w-48">
+            <el-option label="Manager" value="MANAGER" />
+            <el-option label="Product owner" value="PRODUCT_OWNER" />
+            <el-option label="Scrum master" value="SCRUM_MASTER" />
+            <el-option label="Developer" value="DEVELOPER" />
+            <el-option label="Viewer" value="VIEWER" />
+          </el-select>
+          <el-button type="primary" native-type="submit" :loading="memberPending">
+            Add member
+          </el-button>
+        </form>
+        <div
+          v-if="members.length"
+          class="divide-y"
+          style="border-color: var(--el-border-color-lighter)"
+        >
+          <div
+            v-for="member in members"
+            :key="member.id"
+            class="flex flex-wrap items-center gap-3 py-3"
+          >
+            <el-avatar :size="36">{{ member.user.name.slice(0, 1).toUpperCase() }}</el-avatar>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium">{{ member.user.name }}</p>
+              <p class="muted truncate text-xs">{{ member.user.email }}</p>
+            </div>
+            <el-tag size="small" effect="plain">{{ member.role.replaceAll("_", " ") }}</el-tag>
+            <el-button
+              v-if="canManageMembers && member.userId !== currentUser?.id"
+              text
+              type="danger"
+              :disabled="memberPending"
+              @click="removeMember(member)"
+            >
+              Remove
+            </el-button>
+          </div>
+        </div>
+        <el-empty v-else description="No project members yet." :image-size="72" />
+      </el-card>
       <div class="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
         <el-card shadow="never">
           <div class="mb-5 flex items-start justify-between">

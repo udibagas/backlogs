@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   IsBoolean,
   IsDateString,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNumber,
@@ -381,8 +382,13 @@ export class BacklogStatusDto {
 }
 
 export class AddProjectMemberDto {
+  @IsOptional()
   @IsUUID()
-  userId!: string;
+  userId?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
   @IsEnum(ProjectRole)
   role!: ProjectRole;

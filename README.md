@@ -23,7 +23,7 @@ The app can also be run on Node 22.22.3 or newer. Keep Node, PostgreSQL, and dep
 
 - JWT bearer access tokens kept in Nuxt memory, with opaque refresh tokens in `HttpOnly`, `SameSite=Strict` cookies and hashed, revocable, rotating refresh sessions in PostgreSQL.
 - Registration, login, logout, authenticated profile lookup, request validation, throttling, explicit CORS, and origin validation for state-changing cookie requests.
-- Organization creation and listing; project creation, listing, archiving, team memberships, Scrum/Kanban methodology, and project-scoped backend authorization.
+- Organization creation and listing; project creation, listing, archiving, registered-user collaboration by email with project roles, Scrum/Kanban methodology, and project-scoped backend authorization.
 - A persistent Product Backlog with project-scoped human-readable IDs, Epic/Story/Bug/Technical Task/Spike types, priorities, story fields, acceptance criteria, estimates, labels, parent links, dependency-cycle prevention, filtering, and soft archiving.
 - Sprint planning, separate Sprint membership, goal/date checks, lifecycle operations, retained Sprint items, review-event and retrospective-action APIs.
 - Persistent tasks, status/assignee/estimate fields, optional Sprint and backlog-item links, and audit activity.

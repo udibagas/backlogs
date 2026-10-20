@@ -155,8 +155,8 @@ export class CoreService {
   }
 
   async project(userId: string, projectId: string) {
-    await this.projectAccess(userId, projectId);
-    return this.prisma.project.findUniqueOrThrow({
+    const { role } = await this.projectAccess(userId, projectId);
+    const project = await this.prisma.project.findUniqueOrThrow({
       where: { id: projectId },
       include: {
         organization: { select: { id: true, name: true } },
@@ -164,6 +164,7 @@ export class CoreService {
         _count: { select: { backlogItems: true, sprints: true, tasks: true } }
       }
     });
+    return { ...project, currentRole: role };
   }
 
   async updateProject(userId: string, projectId: string, dto: UpdateProjectDto) {
@@ -230,16 +231,37 @@ export class CoreService {
   async addProjectMember(userId: string, projectId: string, dto: AddProjectMemberDto) {
     const { role: actorRole, project } = await this.projectAccess(userId, projectId);
     this.requireManager(actorRole);
-    const orgMember = await this.prisma.organizationMembership.findUnique({
-      where: {
-        organizationId_userId: { organizationId: project.organizationId, userId: dto.userId }
-      }
-    });
-    if (!orgMember) throw new BadRequestException("User must belong to the project's organization");
+    if (Boolean(dto.userId) === Boolean(dto.email)) {
+      throw new BadRequestException("Provide exactly one of userId or email");
+    }
+    const account = dto.email
+      ? await this.prisma.user.findUnique({
+          where: { email: dto.email.trim().toLowerCase() },
+          select: { id: true, active: true }
+        })
+      : null;
+    const memberUserId = account?.id ?? dto.userId;
+    if (!memberUserId) throw new NotFoundException("No account found with this email");
+    if (dto.email && !account?.active)
+      throw new NotFoundException("No active account found with this email");
     return this.prisma.$transaction(async (tx) => {
+      await tx.organizationMembership.upsert({
+        where: {
+          organizationId_userId: {
+            organizationId: project.organizationId,
+            userId: memberUserId
+          }
+        },
+        create: {
+          organizationId: project.organizationId,
+          userId: memberUserId,
+          role: OrganizationRole.MEMBER
+        },
+        update: {}
+      });
       const member = await tx.projectMembership.upsert({
-        where: { projectId_userId: { projectId, userId: dto.userId } },
-        create: { projectId, userId: dto.userId, role: dto.role },
+        where: { projectId_userId: { projectId, userId: memberUserId } },
+        create: { projectId, userId: memberUserId, role: dto.role },
         update: { role: dto.role },
         include: { user: { select: { id: true, name: true, email: true } } }
       });
@@ -771,7 +793,9 @@ export class CoreService {
       ) {
         throw new BadRequestException("Items cannot be removed from a closed Sprint");
       }
-      const removed = await tx.sprintItem.deleteMany({ where: { sprintId, backlogItemId: itemId } });
+      const removed = await tx.sprintItem.deleteMany({
+        where: { sprintId, backlogItemId: itemId }
+      });
       if (removed.count) {
         await tx.activity.create({
           data: {
