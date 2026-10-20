@@ -167,7 +167,7 @@ watch(projectId, load);
         </div>
         <el-input
           v-model="search"
-          class="sm:!w-72"
+          class="sm:w-72!"
           placeholder="Search backlog"
           aria-label="Search backlog"
           clearable

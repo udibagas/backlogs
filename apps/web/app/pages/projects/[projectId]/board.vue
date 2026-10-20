@@ -33,6 +33,28 @@ const members = ref<ProjectMember[]>([]);
 const createDialogOpen = ref(false);
 const loading = ref(true);
 const errorMessage = ref("");
+const columnColors: Record<string, string> = {
+  BACKLOG: "#909399",
+  READY: "#409eff",
+  IN_PROGRESS: "#e6a23c",
+  IN_REVIEW: "#9254de",
+  TESTING: "#13c2c2",
+  DONE: "#67c23a"
+};
+
+function columnStyle(status: string) {
+  const accent = columnColors[status];
+  if (!accent) {
+    return {
+      background: "var(--el-fill-color-light)",
+      border: "1px solid var(--el-border-color-lighter)"
+    };
+  }
+  return {
+    background: `color-mix(in srgb, ${accent} 8%, var(--el-bg-color))`,
+    border: `1px solid color-mix(in srgb, ${accent} 35%, var(--el-border-color-lighter))`
+  };
+}
 
 async function load() {
   loading.value = true;
@@ -100,10 +122,7 @@ watch(projectId, load);
         v-for="column in columns"
         :key="column.id"
         class="min-w-64 rounded-lg p-3"
-        style="
-          background: var(--el-fill-color-light);
-          border: 1px solid var(--el-border-color-lighter);
-        "
+        :style="columnStyle(column.status)"
         @dragover.prevent
         @drop="drop($event, column.status)"
       >
