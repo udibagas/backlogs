@@ -33,11 +33,11 @@ async function logout() {
     <el-aside
       v-if="!isLogin"
       width="100%"
-      class="app-aside relative shrink-0 md:min-h-screen md:!w-64"
+      class="app-aside relative shrink-0 md:min-h-screen md:w-64!"
     >
       <div class="flex items-center justify-between px-5 py-5">
         <NuxtLink to="/" class="text-lg font-bold tracking-tight"
-          >sprintline<span class="text-[var(--el-color-primary)]">.</span></NuxtLink
+          >sprintline<span class="text-(--el-color-primary)">.</span></NuxtLink
         >
         <el-tag type="primary" effect="light" round>Workspace</el-tag>
       </div>
@@ -80,7 +80,7 @@ async function logout() {
         </div>
       </div>
     </el-aside>
-    <el-main class="min-w-0 flex-1 !p-0">
+    <el-main class="min-w-0 flex-1 p-0!">
       <slot />
     </el-main>
   </el-container>
