@@ -61,11 +61,13 @@ export class AuthController {
   }
 
   private cookieOptions() {
+    const sameSite = (process.env.COOKIE_SAME_SITE ?? "lax") as "strict" | "lax" | "none";
     return {
       httpOnly: true,
-      secure: this.configBoolean(process.env.COOKIE_SECURE, process.env.NODE_ENV === "production"),
-      sameSite: "strict" as const,
-      path: "/api/v1/auth"
+      secure: sameSite === "none" || this.configBoolean(process.env.COOKIE_SECURE, process.env.NODE_ENV === "production"),
+      sameSite,
+      path: "/api/v1/auth",
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {})
     };
   }
 
