@@ -14,7 +14,11 @@ interface BacklogItem {
   storyBenefit: string | null;
   criteria: { id: string; description: string; completed: boolean }[];
   dependencies: { dependsOn: { id: string; title: string; status: string } }[];
-  assignee: { name: string } | null;
+  assignee: { id: string; name: string } | null;
+}
+interface ProjectMember {
+  userId: string;
+  user: { id: string; name: string; email: string };
 }
 interface BacklogResponse {
   data: BacklogItem[];
@@ -30,6 +34,7 @@ const route = useRoute();
 const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const items = ref<BacklogItem[]>([]);
+const members = ref<ProjectMember[]>([]);
 const search = ref("");
 const errorMessage = ref("");
 const loading = ref(true);
@@ -48,6 +53,7 @@ const form = reactive({
   storyRole: "",
   storyCapability: "",
   storyBenefit: "",
+  assigneeId: "",
   acceptanceCriteria: ""
 });
 const backlogSchema = z.object({
@@ -65,10 +71,14 @@ async function load() {
   loading.value = true;
   errorMessage.value = "";
   try {
-    const response = await request<BacklogResponse>(`/projects/${projectId.value}/backlog`, {
-      query: { search: search.value || undefined }
-    });
+    const [response, projectMembers] = await Promise.all([
+      request<BacklogResponse>(`/projects/${projectId.value}/backlog`, {
+        query: { search: search.value || undefined }
+      }),
+      request<ProjectMember[]>(`/projects/${projectId.value}/members`)
+    ]);
     items.value = response.data;
+    members.value = projectMembers;
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   } finally {
@@ -86,6 +96,7 @@ function openCreate() {
     storyRole: "",
     storyCapability: "",
     storyBenefit: "",
+    assigneeId: "",
     acceptanceCriteria: ""
   });
   editorOpen.value = true;
@@ -101,6 +112,7 @@ async function openEdit(item: BacklogItem) {
     storyRole: item.storyRole ?? "",
     storyCapability: item.storyCapability ?? "",
     storyBenefit: item.storyBenefit ?? "",
+    assigneeId: item.assignee?.id ?? "",
     acceptanceCriteria: item.criteria.map((criterion) => criterion.description).join("\n")
   });
   dependencyTarget.value = "";
@@ -132,6 +144,7 @@ async function saveItem() {
       storyRole: form.storyRole || undefined,
       storyCapability: form.storyCapability || undefined,
       storyBenefit: form.storyBenefit || undefined,
+      assigneeId: form.assigneeId || (editing.value ? null : undefined),
       acceptanceCriteria: form.acceptanceCriteria
         .split("\n")
         .map((line) => line.trim())
@@ -148,6 +161,18 @@ async function saveItem() {
     errorMessage.value = useErrorMessage(error);
   } finally {
     saving.value = false;
+  }
+}
+async function changeAssignee(item: BacklogItem, assigneeId: string | null) {
+  errorMessage.value = "";
+  try {
+    await request(`/backlog-items/${item.id}`, {
+      method: "PATCH",
+      body: { assigneeId: assigneeId || null }
+    });
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
   }
 }
 async function changeStatus(item: BacklogItem, status: string) {
@@ -276,6 +301,26 @@ watch(projectId, load);
         <el-table-column label="Estimate" width="100">
           <template #default="{ row }">{{ row.estimate ?? "—" }}</template>
         </el-table-column>
+        <el-table-column label="Assignee" min-width="170">
+          <template #default="{ row }">
+            <el-select
+              :model-value="row.assignee?.id ?? ''"
+              size="small"
+              clearable
+              filterable
+              placeholder="Unassigned"
+              :aria-label="`Assign ${row.identifier}`"
+              @change="changeAssignee(row as BacklogItem, $event as string | null)"
+            >
+              <el-option
+                v-for="member in members"
+                :key="member.userId"
+                :label="member.user.name"
+                :value="member.userId"
+              />
+            </el-select>
+          </template>
+        </el-table-column>
         <el-table-column label="Status" width="170">
           <template #default="{ row }">
             <el-select
@@ -366,6 +411,22 @@ watch(projectId, load);
         </template>
         <el-form-item label="Estimate (points)">
           <el-input v-model="form.estimate" type="number" min="0" max="1000" step="0.5" />
+        </el-form-item>
+        <el-form-item label="Assignee">
+          <el-select
+            v-model="form.assigneeId"
+            clearable
+            filterable
+            placeholder="Unassigned"
+            aria-label="Backlog item assignee"
+          >
+            <el-option
+              v-for="member in members"
+              :key="member.userId"
+              :label="member.user.name"
+              :value="member.userId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="Acceptance criteria (one criterion per line)">
           <el-input
