@@ -21,17 +21,27 @@ interface Column {
   overLimit: boolean;
   cards: Card[];
 }
+interface ProjectMember {
+  userId: string;
+  user: { id: string; name: string; email: string };
+}
 const route = useRoute();
 const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const columns = ref<Column[]>([]);
+const members = ref<ProjectMember[]>([]);
+const createDialogOpen = ref(false);
 const loading = ref(true);
 const errorMessage = ref("");
 
 async function load() {
   loading.value = true;
+  errorMessage.value = "";
   try {
-    columns.value = await request<Column[]>(`/projects/${projectId.value}/board`);
+    [columns.value, members.value] = await Promise.all([
+      request<Column[]>(`/projects/${projectId.value}/board`),
+      request<ProjectMember[]>(`/projects/${projectId.value}/members`)
+    ]);
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   } finally {
@@ -75,7 +85,10 @@ watch(projectId, load);
           inconvenient.
         </p>
       </div>
-      <el-button @click="navigateTo(`/projects/${projectId}/backlog`)">Product backlog</el-button>
+      <div class="flex flex-wrap gap-2">
+        <el-button @click="navigateTo(`/projects/${projectId}/backlog`)">Product backlog</el-button>
+        <el-button type="primary" @click="createDialogOpen = true">+ New item</el-button>
+      </div>
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-skeleton v-if="loading" :rows="6" animated />
@@ -159,5 +172,13 @@ watch(projectId, load);
         </div>
       </section>
     </div>
+    <BacklogItemForm
+      v-model="createDialogOpen"
+      :project-id="projectId"
+      :members="members"
+      :item="null"
+      @saved="load"
+      @error="errorMessage = $event"
+    />
   </div>
 </template>

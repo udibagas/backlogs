@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { z } from "zod";
 interface BacklogItem {
   id: string;
   identifier: string;
@@ -38,34 +37,11 @@ const members = ref<ProjectMember[]>([]);
 const search = ref("");
 const errorMessage = ref("");
 const loading = ref(true);
-const saving = ref(false);
 const comments = ref<Comment[]>([]);
 const newComment = ref("");
 const dependencyTarget = ref("");
 const editorOpen = ref(false);
 const editing = ref<BacklogItem | null>(null);
-const form = reactive({
-  title: "",
-  description: "",
-  type: "USER_STORY",
-  priority: "MEDIUM",
-  estimate: "",
-  storyRole: "",
-  storyCapability: "",
-  storyBenefit: "",
-  assigneeId: "",
-  acceptanceCriteria: ""
-});
-const backlogSchema = z.object({
-  title: z.string().trim().min(2).max(240),
-  description: z.string().max(10000),
-  estimate: z
-    .string()
-    .refine(
-      (value) => !value || (Number(value) >= 0 && Number(value) <= 1000),
-      "Estimate must be between 0 and 1000."
-    )
-});
 
 async function load() {
   loading.value = true;
@@ -87,34 +63,10 @@ async function load() {
 }
 function openCreate() {
   editing.value = null;
-  Object.assign(form, {
-    title: "",
-    description: "",
-    type: "USER_STORY",
-    priority: "MEDIUM",
-    estimate: "",
-    storyRole: "",
-    storyCapability: "",
-    storyBenefit: "",
-    assigneeId: "",
-    acceptanceCriteria: ""
-  });
   editorOpen.value = true;
 }
 async function openEdit(item: BacklogItem) {
   editing.value = item;
-  Object.assign(form, {
-    title: item.title,
-    description: item.description,
-    type: item.type,
-    priority: item.priority,
-    estimate: item.estimate?.toString() ?? "",
-    storyRole: item.storyRole ?? "",
-    storyCapability: item.storyCapability ?? "",
-    storyBenefit: item.storyBenefit ?? "",
-    assigneeId: item.assignee?.id ?? "",
-    acceptanceCriteria: item.criteria.map((criterion) => criterion.description).join("\n")
-  });
   dependencyTarget.value = "";
   newComment.value = "";
   try {
@@ -125,43 +77,6 @@ async function openEdit(item: BacklogItem) {
     errorMessage.value = useErrorMessage(error);
   }
   editorOpen.value = true;
-}
-async function saveItem() {
-  errorMessage.value = "";
-  const parsed = backlogSchema.safeParse(form);
-  if (!parsed.success) {
-    errorMessage.value = parsed.error.issues[0]?.message ?? "Check the backlog item.";
-    return;
-  }
-  saving.value = true;
-  try {
-    const body = {
-      title: form.title.trim(),
-      description: form.description,
-      type: form.type,
-      priority: form.priority,
-      estimate: form.estimate ? Number(form.estimate) : undefined,
-      storyRole: form.storyRole || undefined,
-      storyCapability: form.storyCapability || undefined,
-      storyBenefit: form.storyBenefit || undefined,
-      assigneeId: form.assigneeId || (editing.value ? null : undefined),
-      acceptanceCriteria: form.acceptanceCriteria
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean)
-    };
-    if (editing.value) {
-      await request(`/backlog-items/${editing.value.id}`, { method: "PATCH", body });
-    } else {
-      await request(`/projects/${projectId.value}/backlog`, { method: "POST", body });
-    }
-    editorOpen.value = false;
-    await load();
-  } catch (error) {
-    errorMessage.value = useErrorMessage(error);
-  } finally {
-    saving.value = false;
-  }
 }
 async function changeAssignee(item: BacklogItem, assigneeId: string | null) {
   errorMessage.value = "";
@@ -351,92 +266,15 @@ watch(projectId, load);
       </el-table>
     </el-card>
 
-    <el-dialog
+    <BacklogItemForm
       v-model="editorOpen"
-      :title="editing ? 'Refine backlog item' : 'Create backlog item'"
-      width="680px"
-      top="5vh"
-      append-to-body
+      :project-id="projectId"
+      :members="members"
+      :item="editing"
+      @saved="load"
+      @error="errorMessage = $event"
     >
-      <p class="eyebrow">{{ editing?.identifier ?? "Product backlog" }}</p>
-      <el-form class="form-stack" label-position="top" @submit.prevent="saveItem">
-        <el-form-item label="Title">
-          <el-input v-model="form.title" maxlength="240" />
-        </el-form-item>
-        <el-row :gutter="16">
-          <el-col :sm="12" :xs="24">
-            <el-form-item label="Type">
-              <el-select v-model="form.type">
-                <el-option
-                  v-for="type in ['EPIC', 'USER_STORY', 'BUG', 'TECHNICAL_TASK', 'SPIKE']"
-                  :key="type"
-                  :label="type.replaceAll('_', ' ')"
-                  :value="type"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :sm="12" :xs="24">
-            <el-form-item label="Priority">
-              <el-select v-model="form.priority">
-                <el-option
-                  v-for="priority in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']"
-                  :key="priority"
-                  :label="priority"
-                  :value="priority"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="Description">
-          <el-input v-model="form.description" type="textarea" :rows="4" maxlength="10000" />
-        </el-form-item>
-        <template v-if="form.type === 'USER_STORY'">
-          <el-row :gutter="16">
-            <el-col :sm="12" :xs="24">
-              <el-form-item label="As a…">
-                <el-input v-model="form.storyRole" placeholder="team member" />
-              </el-form-item>
-            </el-col>
-            <el-col :sm="12" :xs="24">
-              <el-form-item label="I want…">
-                <el-input v-model="form.storyCapability" placeholder="to organize my work" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="So that…">
-            <el-input v-model="form.storyBenefit" placeholder="I can focus on the next step" />
-          </el-form-item>
-        </template>
-        <el-form-item label="Estimate (points)">
-          <el-input v-model="form.estimate" type="number" min="0" max="1000" step="0.5" />
-        </el-form-item>
-        <el-form-item label="Assignee">
-          <el-select
-            v-model="form.assigneeId"
-            clearable
-            filterable
-            placeholder="Unassigned"
-            aria-label="Backlog item assignee"
-          >
-            <el-option
-              v-for="member in members"
-              :key="member.userId"
-              :label="member.user.name"
-              :value="member.userId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Acceptance criteria (one criterion per line)">
-          <el-input
-            v-model="form.acceptanceCriteria"
-            type="textarea"
-            :rows="4"
-            placeholder="Given… When… Then…"
-          />
-        </el-form-item>
-
+      <template #details>
         <div v-if="editing" class="mb-4">
           <h3 class="mb-2 text-sm font-semibold">Dependencies</h3>
           <ul v-if="editing.dependencies.length" class="m-0 mb-3 list-none space-y-2 p-0">
@@ -514,13 +352,7 @@ watch(projectId, load);
             Add comment
           </el-button>
         </div>
-      </el-form>
-      <template #footer>
-        <el-button @click="editorOpen = false">Cancel</el-button>
-        <el-button type="primary" :loading="saving" @click="saveItem">
-          {{ editing ? "Save changes" : "Add to backlog" }}
-        </el-button>
       </template>
-    </el-dialog>
+    </BacklogItemForm>
   </div>
 </template>
