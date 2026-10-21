@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, Close, Delete, Edit, Grid, List, Plus } from "@element-plus/icons-vue";
+import { Check, Close, Delete, Edit, Grid, List, Plus, View } from "@element-plus/icons-vue";
 import { ElMessageBox } from "element-plus";
 
 interface Task {
@@ -9,7 +9,10 @@ interface Task {
   status: string;
   priority: string;
   estimate: number | null;
+  actualEffort: number | null;
   dueDate: string | null;
+  createdAt: string;
+  updatedAt: string;
   assignee: { name: string } | null;
   backlogItem: { title: string; itemNumber: number } | null;
 }
@@ -20,6 +23,8 @@ const tasks = ref<Task[]>([]);
 const displayMode = ref<"list" | "board">("list");
 const form = reactive({ title: "", description: "", priority: "MEDIUM", estimate: "" });
 const taskDialogOpen = ref(false);
+const taskDetailsDialogOpen = ref(false);
+const selectedTask = ref<Task | null>(null);
 const editingTaskId = ref<string | null>(null);
 const errorMessage = ref("");
 const loading = ref(true);
@@ -34,6 +39,15 @@ const taskStatusColors: Record<string, string> = {
   BLOCKED: "#f56c6c",
   DONE: "#67c23a"
 };
+const estimateOptions = [
+  { size: "XS", points: 1 },
+  { size: "S", points: 2 },
+  { size: "M", points: 4 },
+  { size: "L", points: 8 },
+  { size: "XL", points: 16 },
+  { size: "XXL", points: 32 },
+  { size: "XXXL", points: 64 }
+];
 const taskColumns = computed(() =>
   taskStatuses.map((status) => ({
     status,
@@ -47,6 +61,28 @@ function taskColumnStyle(status: string) {
     background: `color-mix(in srgb, ${accent} 8%, var(--el-bg-color))`,
     border: `1px solid color-mix(in srgb, ${accent} 35%, var(--el-border-color-lighter))`
   };
+}
+
+function priorityTagType(priority: string) {
+  switch (priority) {
+    case "CRITICAL":
+      return "danger";
+    case "HIGH":
+      return "warning";
+    case "MEDIUM":
+      return "primary";
+    default:
+      return "info";
+  }
+}
+
+function openTaskDetails(task: Task) {
+  selectedTask.value = task;
+  taskDetailsDialogOpen.value = true;
+}
+
+function formatDate(value: string | null) {
+  return value ? new Date(value).toLocaleString() : "—";
 }
 
 function openCreateTask() {
@@ -178,6 +214,58 @@ watch(projectId, load);
       class="mb-5"
     />
     <el-dialog
+      v-model="taskDetailsDialogOpen"
+      :title="selectedTask?.title ?? 'Task details'"
+      width="600px"
+      append-to-body
+    >
+      <template v-if="selectedTask">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="Status">
+            <el-tag
+              :color="taskStatusColors[selectedTask.status]"
+              effect="dark"
+              class="border-0!"
+            >
+              {{ selectedTask.status.replaceAll("_", " ").toLowerCase() }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="Priority">
+            <el-tag size="small" :type="priorityTagType(selectedTask.priority)">
+              {{ selectedTask.priority.toLowerCase() }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="Estimate">
+            {{ selectedTask.estimate == null ? "—" : `${selectedTask.estimate} points` }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Actual effort">
+            {{ selectedTask.actualEffort == null ? "—" : `${selectedTask.actualEffort} points` }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Assignee">
+            {{ selectedTask.assignee?.name ?? "Unassigned" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Parent item">
+            {{ selectedTask.backlogItem?.title ?? "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Due date">
+            {{ formatDate(selectedTask.dueDate) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Created">
+            {{ formatDate(selectedTask.createdAt) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Last updated" :span="2">
+            {{ formatDate(selectedTask.updatedAt) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Description" :span="2">
+            <p class="whitespace-pre-wrap">{{ selectedTask.description || "No description" }}</p>
+          </el-descriptions-item>
+        </el-descriptions>
+      </template>
+      <template #footer>
+        <el-button :icon="Close" @click="taskDetailsDialogOpen = false">Close</el-button>
+      </template>
+    </el-dialog>
+    <el-dialog
       v-model="taskDialogOpen"
       :title="editingTaskId ? 'Edit task' : 'Create a task'"
       width="600px"
@@ -204,8 +292,15 @@ watch(projectId, load);
             </el-form-item>
           </el-col>
           <el-col :md="6" :xs="12">
-            <el-form-item label="Estimate">
-              <el-input v-model="form.estimate" type="number" min="0" max="1000" step="0.5" />
+            <el-form-item label="Estimate (T-shirt size)">
+              <el-select v-model="form.estimate" placeholder="Select an estimate" clearable>
+                <el-option
+                  v-for="estimate in estimateOptions"
+                  :key="estimate.size"
+                  :label="`${estimate.size} (${estimate.points} ${estimate.points === 1 ? 'point' : 'points'})`"
+                  :value="String(estimate.points)"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -228,7 +323,7 @@ watch(projectId, load);
         </el-button>
       </template>
     </el-dialog>
-    <el-card shadow="never">
+    <el-card shadow="never" body-class="p-0!">
       <template #header>
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -265,6 +360,7 @@ watch(projectId, load);
         v-loading="loading"
         :data="tasks"
         empty-text="No tasks yet. Create the first implementation task."
+        height="calc(100vh - 300px)"
       >
         <el-table-column label="Task" min-width="240">
           <template #default="{ row }">
@@ -278,7 +374,11 @@ watch(projectId, load);
           <template #default="{ row }">{{ row.backlogItem?.title ?? "—" }}</template>
         </el-table-column>
         <el-table-column label="Priority" width="110">
-          <template #default="{ row }">{{ row.priority.toLowerCase() }}</template>
+          <template #default="{ row }">
+            <el-tag size="small" :type="priorityTagType(row.priority)">
+              {{ row.priority.toLowerCase() }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column label="Estimate" width="100">
           <template #default="{ row }">{{ row.estimate ?? "—" }}</template>
@@ -300,20 +400,30 @@ watch(projectId, load);
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="150" fixed="right">
+        <el-table-column label="" width="120" fixed="right" align="right">
           <template #default="{ row }">
-            <el-button link type="primary" :icon="Edit" @click="openEditTask(row as Task)">
-              Edit
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              :icon="Delete"
-              :loading="deletingTaskId === row.id"
-              @click="deleteTask(row as Task)"
-            >
-              Delete
-            </el-button>
+            <el-dropdown trigger="click">
+              <el-button
+                :icon="ElIconMore"
+                size="small"
+                :loading="deletingTaskId === row.id"
+                :aria-label="`Actions for ${row.title}`"
+              >
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :icon="View" @click="openTaskDetails(row as Task)">
+                    View details
+                  </el-dropdown-item>
+                  <el-dropdown-item :icon="Edit" @click="openEditTask(row as Task)">
+                    Edit
+                  </el-dropdown-item>
+                  <el-dropdown-item :icon="Delete" divided @click="deleteTask(row as Task)">
+                    Delete
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -353,6 +463,15 @@ watch(projectId, load);
                 <span>{{ task.estimate ?? "—" }} pts</span>
               </div>
               <div class="mt-3 flex items-center justify-between gap-2">
+                <el-button
+                  link
+                  type="primary"
+                  :icon="View"
+                  :aria-label="`View details for ${task.title}`"
+                  title="View details"
+                  @click="openTaskDetails(task)"
+                >
+                </el-button>
                 <el-select
                   :model-value="task.status"
                   size="small"

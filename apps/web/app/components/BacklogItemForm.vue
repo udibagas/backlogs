@@ -37,6 +37,15 @@ const emit = defineEmits<{
 const { request } = useApi();
 const saving = ref(false);
 const errorMessage = ref("");
+const estimateOptions = [
+  { size: "XS", points: 1 },
+  { size: "S", points: 2 },
+  { size: "M", points: 4 },
+  { size: "L", points: 8 },
+  { size: "XL", points: 16 },
+  { size: "XXL", points: 32 },
+  { size: "XXXL", points: 64 }
+];
 const form = reactive({
   title: "",
   description: "",
@@ -187,8 +196,15 @@ async function saveItem() {
           <el-input v-model="form.storyBenefit" placeholder="I can focus on the next step" />
         </el-form-item>
       </template>
-      <el-form-item label="Estimate (points)">
-        <el-input v-model="form.estimate" type="number" min="0" max="1000" step="0.5" />
+      <el-form-item label="Estimate (T-shirt size)">
+        <el-select v-model="form.estimate" placeholder="Select an estimate" clearable>
+          <el-option
+            v-for="estimate in estimateOptions"
+            :key="estimate.size"
+            :label="`${estimate.size} (${estimate.points} ${estimate.points === 1 ? 'point' : 'points'})`"
+            :value="String(estimate.points)"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="Due date">
         <el-date-picker
