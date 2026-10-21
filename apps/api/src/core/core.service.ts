@@ -16,6 +16,8 @@ import {
   TaskStatus
 } from "../generated/prisma/client";
 import { randomUUID } from "node:crypto";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { PrismaService } from "../prisma/prisma.service";
 import type {
   AddProjectMemberDto,
@@ -52,6 +54,13 @@ const defaultColumns = [
   { name: "Testing", status: BacklogStatus.TESTING, position: 4 },
   { name: "Done", status: BacklogStatus.DONE, position: 5 }
 ];
+
+interface UploadedAttachment {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+}
 
 @Injectable()
 export class CoreService {
@@ -360,6 +369,41 @@ export class CoreService {
       })),
       pagination: { page, limit, total, pages: Math.ceil(total / limit) }
     };
+  }
+
+  async backlogItem(userId: string, itemId: string) {
+    const item = await this.prisma.backlogItem.findFirst({
+      where: { id: itemId, archivedAt: null },
+      include: {
+        project: { select: { key: true } },
+        assignee: { select: { id: true, name: true } },
+        criteria: { orderBy: { order: "asc" } },
+        parent: { select: { id: true, itemNumber: true, title: true, status: true } },
+        children: {
+          where: { archivedAt: null },
+          orderBy: { itemNumber: "asc" },
+          select: { id: true, itemNumber: true, title: true, status: true, type: true }
+        },
+        dependencies: {
+          include: {
+            dependsOn: { select: { id: true, itemNumber: true, title: true, status: true } }
+          }
+        },
+        dependedOnBy: {
+          include: {
+            item: { select: { id: true, itemNumber: true, title: true, status: true } }
+          }
+        },
+        tasks: {
+          orderBy: { createdAt: "asc" },
+          include: { assignee: { select: { id: true, name: true } } }
+        },
+        _count: { select: { comments: true } }
+      }
+    });
+    if (!item) throw new NotFoundException("Backlog item not found");
+    await this.projectAccess(userId, item.projectId);
+    return { ...item, identifier: `${item.project.key}-${item.itemNumber}` };
   }
 
   async createBacklogItem(userId: string, projectId: string, dto: CreateBacklogDto) {
@@ -1098,6 +1142,8 @@ export class CoreService {
     if (Boolean(dto.backlogItemId) === Boolean(dto.taskId)) {
       throw new BadRequestException("A comment must belong to exactly one backlog item or task");
     }
+    const body = dto.body?.trim() ?? "";
+    if (!body) throw new BadRequestException("Comment body is required");
     if (dto.backlogItemId) {
       const exists = await this.prisma.backlogItem.findFirst({
         where: { id: dto.backlogItemId, projectId },
@@ -1118,7 +1164,7 @@ export class CoreService {
           authorId: userId,
           backlogItemId: dto.backlogItemId,
           taskId: dto.taskId,
-          body: dto.body.trim()
+          body
         },
         include: { author: { select: { id: true, name: true } } }
       });
@@ -1136,6 +1182,91 @@ export class CoreService {
     });
   }
 
+  async addCommentWithAttachments(
+    userId: string,
+    projectId: string,
+    dto: CreateCommentDto,
+    files: UploadedAttachment[]
+  ) {
+    const { role } = await this.projectAccess(userId, projectId);
+    this.requireEditor(role);
+    if (!dto.backlogItemId || dto.taskId) {
+      throw new BadRequestException("Attachments must belong to a backlog item discussion");
+    }
+    if (!dto.body?.trim() && files.length === 0) {
+      throw new BadRequestException("Add a comment or attach at least one file");
+    }
+    const item = await this.prisma.backlogItem.findFirst({
+      where: { id: dto.backlogItemId, projectId, archivedAt: null },
+      select: { id: true }
+    });
+    if (!item) throw new NotFoundException("Backlog item not found in this project");
+
+    const storageDirectory = resolve(process.env.ATTACHMENT_STORAGE_PATH ?? "uploads");
+    await mkdir(storageDirectory, { recursive: true, mode: 0o700 });
+    const storedFiles = files.map((file) => ({
+      id: randomUUID(),
+      storedName: randomUUID(),
+      originalName: file.originalname.replace(/[\\/\\r\\n\\0]/g, "_").slice(0, 255) || "attachment",
+      mimeType: file.mimetype || "application/octet-stream",
+      size: file.size,
+      buffer: file.buffer
+    }));
+    const writtenPaths: string[] = [];
+    try {
+      for (const file of storedFiles) {
+        const filePath = resolve(storageDirectory, file.storedName);
+        await writeFile(filePath, file.buffer, { flag: "wx", mode: 0o600 });
+        writtenPaths.push(filePath);
+      }
+      return await this.prisma.$transaction(async (tx) => {
+        const comment = await tx.comment.create({
+          data: {
+            projectId,
+            authorId: userId,
+            backlogItemId: item.id,
+            body: dto.body?.trim() ?? "",
+            attachments: {
+              create: storedFiles.map(({ id, storedName, originalName, mimeType, size }) => ({
+                id,
+                storedName,
+                originalName,
+                mimeType,
+                size
+              }))
+            }
+          },
+          include: {
+            author: { select: { id: true, name: true } },
+            attachments: {
+              select: {
+                id: true,
+                originalName: true,
+                mimeType: true,
+                size: true,
+                createdAt: true
+              }
+            }
+          }
+        });
+        await tx.activity.create({
+          data: {
+            projectId,
+            actorId: userId,
+            action: "comment.created",
+            entityType: "BacklogItem",
+            entityId: item.id,
+            details: { attachmentCount: storedFiles.length }
+          }
+        });
+        return comment;
+      });
+    } catch (error) {
+      await Promise.allSettled(writtenPaths.map((filePath) => unlink(filePath)));
+      throw error;
+    }
+  }
+
   async comments(userId: string, projectId: string, entityId: string) {
     await this.projectAccess(userId, projectId);
     return this.prisma.comment.findMany({
@@ -1144,8 +1275,34 @@ export class CoreService {
         OR: [{ backlogItemId: entityId }, { taskId: entityId }]
       },
       orderBy: { createdAt: "asc" },
-      include: { author: { select: { id: true, name: true } } }
+      include: {
+        author: { select: { id: true, name: true } },
+        attachments: {
+          select: { id: true, originalName: true, mimeType: true, size: true, createdAt: true }
+        }
+      }
     });
+  }
+
+  async commentAttachment(
+    userId: string,
+    projectId: string,
+    commentId: string,
+    attachmentId: string
+  ) {
+    await this.projectAccess(userId, projectId);
+    const attachment = await this.prisma.commentAttachment.findFirst({
+      where: { id: attachmentId, commentId, comment: { projectId } }
+    });
+    if (!attachment) throw new NotFoundException("Attachment not found");
+    const storedName = attachment.storedName;
+    if (!/^[0-9a-f-]{36}$/i.test(storedName)) {
+      throw new NotFoundException("Attachment not found");
+    }
+    return {
+      ...attachment,
+      filePath: resolve(process.env.ATTACHMENT_STORAGE_PATH ?? "uploads", storedName)
+    };
   }
 
   async activities(userId: string, projectId: string, page = 1) {

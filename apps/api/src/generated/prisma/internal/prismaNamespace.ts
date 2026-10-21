@@ -412,6 +412,7 @@ export const ModelName = {
   TaskDependency: 'TaskDependency',
   WorkflowColumn: 'WorkflowColumn',
   Comment: 'Comment',
+  CommentAttachment: 'CommentAttachment',
   Activity: 'Activity',
   SprintEvent: 'SprintEvent',
   RetrospectiveAction: 'RetrospectiveAction'
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshSession" | "organization" | "organizationMembership" | "project" | "projectMembership" | "backlogItem" | "acceptanceCriterion" | "backlogDependency" | "sprint" | "sprintItem" | "task" | "taskDependency" | "workflowColumn" | "comment" | "activity" | "sprintEvent" | "retrospectiveAction"
+    modelProps: "user" | "refreshSession" | "organization" | "organizationMembership" | "project" | "projectMembership" | "backlogItem" | "acceptanceCriterion" | "backlogDependency" | "sprint" | "sprintItem" | "task" | "taskDependency" | "workflowColumn" | "comment" | "commentAttachment" | "activity" | "sprintEvent" | "retrospectiveAction"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1544,6 +1545,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CommentAttachment: {
+      payload: Prisma.$CommentAttachmentPayload<ExtArgs>
+      fields: Prisma.CommentAttachmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CommentAttachmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CommentAttachmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        findFirst: {
+          args: Prisma.CommentAttachmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CommentAttachmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        findMany: {
+          args: Prisma.CommentAttachmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>[]
+        }
+        create: {
+          args: Prisma.CommentAttachmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        createMany: {
+          args: Prisma.CommentAttachmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CommentAttachmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>[]
+        }
+        delete: {
+          args: Prisma.CommentAttachmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        update: {
+          args: Prisma.CommentAttachmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.CommentAttachmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CommentAttachmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CommentAttachmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.CommentAttachmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentAttachmentPayload>
+        }
+        aggregate: {
+          args: Prisma.CommentAttachmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCommentAttachment>
+        }
+        groupBy: {
+          args: Prisma.CommentAttachmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentAttachmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CommentAttachmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentAttachmentCountAggregateOutputType> | number
+        }
+      }
+    }
     Activity: {
       payload: Prisma.$ActivityPayload<ExtArgs>
       fields: Prisma.ActivityFieldRefs
@@ -2014,6 +2089,19 @@ export const CommentScalarFieldEnum = {
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
 
 
+export const CommentAttachmentScalarFieldEnum = {
+  id: 'id',
+  commentId: 'commentId',
+  originalName: 'originalName',
+  storedName: 'storedName',
+  mimeType: 'mimeType',
+  size: 'size',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentAttachmentScalarFieldEnum = (typeof CommentAttachmentScalarFieldEnum)[keyof typeof CommentAttachmentScalarFieldEnum]
+
+
 export const ActivityScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
@@ -2481,6 +2569,7 @@ export type GlobalOmitConfig = {
   taskDependency?: Prisma.TaskDependencyOmit
   workflowColumn?: Prisma.WorkflowColumnOmit
   comment?: Prisma.CommentOmit
+  commentAttachment?: Prisma.CommentAttachmentOmit
   activity?: Prisma.ActivityOmit
   sprintEvent?: Prisma.SprintEventOmit
   retrospectiveAction?: Prisma.RetrospectiveActionOmit

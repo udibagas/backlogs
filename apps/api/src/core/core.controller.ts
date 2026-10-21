@@ -3,14 +3,24 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   Param,
   ParseIntPipe,
   Patch,
   ParseEnumPipe,
   Post,
   Query,
+  Res,
+  StreamableFile,
+  UploadedFiles,
+  UseInterceptors,
   UseGuards
 } from "@nestjs/common";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import type { Response } from "express";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { basename } from "node:path";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../auth/current-user.decorator";
 import type { AuthUser } from "../auth/auth.types";
@@ -124,6 +134,11 @@ export class CoreController {
     @Query() query: ListBacklogQuery
   ) {
     return this.core.backlog(user.sub, projectId, query);
+  }
+
+  @Get("backlog-items/:itemId")
+  backlogItem(@CurrentUser() user: AuthUser, @Param("itemId") itemId: string) {
+    return this.core.backlogItem(user.sub, itemId);
   }
 
   @Post("projects/:projectId/backlog")
@@ -308,4 +323,57 @@ export class CoreController {
   ) {
     return this.core.addComment(user.sub, projectId, dto);
   }
+
+  @Post("projects/:projectId/comments/with-attachments")
+  @UseInterceptors(
+    FilesInterceptor("attachments", 5, {
+      limits: { fileSize: 10 * 1024 * 1024, files: 5 }
+    })
+  )
+  addCommentWithAttachments(
+    @CurrentUser() user: AuthUser,
+    @Param("projectId") projectId: string,
+    @Body() dto: CreateCommentDto,
+    @UploadedFiles() files: UploadedAttachment[]
+  ) {
+    return this.core.addCommentWithAttachments(user.sub, projectId, dto, files ?? []);
+  }
+
+  @Get("projects/:projectId/comments/:commentId/attachments/:attachmentId")
+  async downloadCommentAttachment(
+    @CurrentUser() user: AuthUser,
+    @Param("projectId") projectId: string,
+    @Param("commentId") commentId: string,
+    @Param("attachmentId") attachmentId: string,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const attachment = await this.core.commentAttachment(
+      user.sub,
+      projectId,
+      commentId,
+      attachmentId
+    );
+    try {
+      await stat(attachment.filePath);
+    } catch {
+      throw new InternalServerErrorException("Attachment file is unavailable");
+    }
+    const safeName = basename(attachment.originalName).replace(/[\r\n"]/g, "_");
+    const encodedName = encodeURIComponent(safeName).replace(/'/g, "%27");
+    response.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${safeName.replace(/[^\x20-\x7E]/g, "_")}"; filename*=UTF-8''${encodedName}`
+    );
+    response.setHeader("Content-Type", attachment.mimeType || "application/octet-stream");
+    response.setHeader("Content-Length", attachment.size);
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    return new StreamableFile(createReadStream(attachment.filePath));
+  }
+}
+
+interface UploadedAttachment {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
 }

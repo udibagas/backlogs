@@ -210,6 +210,7 @@ export type CommentWhereInput = {
   backlogItem?: Prisma.XOR<Prisma.BacklogItemNullableScalarRelationFilter, Prisma.BacklogItemWhereInput> | null
   task?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  attachments?: Prisma.CommentAttachmentListRelationFilter
 }
 
 export type CommentOrderByWithRelationInput = {
@@ -225,6 +226,7 @@ export type CommentOrderByWithRelationInput = {
   backlogItem?: Prisma.BacklogItemOrderByWithRelationInput
   task?: Prisma.TaskOrderByWithRelationInput
   author?: Prisma.UserOrderByWithRelationInput
+  attachments?: Prisma.CommentAttachmentOrderByRelationAggregateInput
 }
 
 export type CommentWhereUniqueInput = Prisma.AtLeast<{
@@ -243,6 +245,7 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   backlogItem?: Prisma.XOR<Prisma.BacklogItemNullableScalarRelationFilter, Prisma.BacklogItemWhereInput> | null
   task?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  attachments?: Prisma.CommentAttachmentListRelationFilter
 }, "id">
 
 export type CommentOrderByWithAggregationInput = {
@@ -282,6 +285,7 @@ export type CommentCreateInput = {
   backlogItem?: Prisma.BacklogItemCreateNestedOneWithoutCommentsInput
   task?: Prisma.TaskCreateNestedOneWithoutCommentsInput
   author: Prisma.UserCreateNestedOneWithoutCommentsInput
+  attachments?: Prisma.CommentAttachmentCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUncheckedCreateInput = {
@@ -293,6 +297,7 @@ export type CommentUncheckedCreateInput = {
   body: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUpdateInput = {
@@ -304,6 +309,7 @@ export type CommentUpdateInput = {
   backlogItem?: Prisma.BacklogItemUpdateOneWithoutCommentsNestedInput
   task?: Prisma.TaskUpdateOneWithoutCommentsNestedInput
   author?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
+  attachments?: Prisma.CommentAttachmentUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateInput = {
@@ -315,6 +321,7 @@ export type CommentUncheckedUpdateInput = {
   body?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentCreateManyInput = {
@@ -387,6 +394,11 @@ export type CommentMinOrderByAggregateInput = {
   body?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CommentScalarRelationFilter = {
+  is?: Prisma.CommentWhereInput
+  isNot?: Prisma.CommentWhereInput
 }
 
 export type CommentCreateNestedManyWithoutAuthorInput = {
@@ -557,6 +569,20 @@ export type CommentUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.CommentScalarWhereInput | Prisma.CommentScalarWhereInput[]
 }
 
+export type CommentCreateNestedOneWithoutAttachmentsInput = {
+  create?: Prisma.XOR<Prisma.CommentCreateWithoutAttachmentsInput, Prisma.CommentUncheckedCreateWithoutAttachmentsInput>
+  connectOrCreate?: Prisma.CommentCreateOrConnectWithoutAttachmentsInput
+  connect?: Prisma.CommentWhereUniqueInput
+}
+
+export type CommentUpdateOneRequiredWithoutAttachmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.CommentCreateWithoutAttachmentsInput, Prisma.CommentUncheckedCreateWithoutAttachmentsInput>
+  connectOrCreate?: Prisma.CommentCreateOrConnectWithoutAttachmentsInput
+  upsert?: Prisma.CommentUpsertWithoutAttachmentsInput
+  connect?: Prisma.CommentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CommentUpdateToOneWithWhereWithoutAttachmentsInput, Prisma.CommentUpdateWithoutAttachmentsInput>, Prisma.CommentUncheckedUpdateWithoutAttachmentsInput>
+}
+
 export type CommentCreateWithoutAuthorInput = {
   id?: string
   body: string
@@ -565,6 +591,7 @@ export type CommentCreateWithoutAuthorInput = {
   project: Prisma.ProjectCreateNestedOneWithoutCommentsInput
   backlogItem?: Prisma.BacklogItemCreateNestedOneWithoutCommentsInput
   task?: Prisma.TaskCreateNestedOneWithoutCommentsInput
+  attachments?: Prisma.CommentAttachmentCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUncheckedCreateWithoutAuthorInput = {
@@ -575,6 +602,7 @@ export type CommentUncheckedCreateWithoutAuthorInput = {
   body: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedCreateNestedManyWithoutCommentInput
 }
 
 export type CommentCreateOrConnectWithoutAuthorInput = {
@@ -625,6 +653,7 @@ export type CommentCreateWithoutProjectInput = {
   backlogItem?: Prisma.BacklogItemCreateNestedOneWithoutCommentsInput
   task?: Prisma.TaskCreateNestedOneWithoutCommentsInput
   author: Prisma.UserCreateNestedOneWithoutCommentsInput
+  attachments?: Prisma.CommentAttachmentCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUncheckedCreateWithoutProjectInput = {
@@ -635,6 +664,7 @@ export type CommentUncheckedCreateWithoutProjectInput = {
   body: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedCreateNestedManyWithoutCommentInput
 }
 
 export type CommentCreateOrConnectWithoutProjectInput = {
@@ -671,6 +701,7 @@ export type CommentCreateWithoutBacklogItemInput = {
   project: Prisma.ProjectCreateNestedOneWithoutCommentsInput
   task?: Prisma.TaskCreateNestedOneWithoutCommentsInput
   author: Prisma.UserCreateNestedOneWithoutCommentsInput
+  attachments?: Prisma.CommentAttachmentCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUncheckedCreateWithoutBacklogItemInput = {
@@ -681,6 +712,7 @@ export type CommentUncheckedCreateWithoutBacklogItemInput = {
   body: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedCreateNestedManyWithoutCommentInput
 }
 
 export type CommentCreateOrConnectWithoutBacklogItemInput = {
@@ -717,6 +749,7 @@ export type CommentCreateWithoutTaskInput = {
   project: Prisma.ProjectCreateNestedOneWithoutCommentsInput
   backlogItem?: Prisma.BacklogItemCreateNestedOneWithoutCommentsInput
   author: Prisma.UserCreateNestedOneWithoutCommentsInput
+  attachments?: Prisma.CommentAttachmentCreateNestedManyWithoutCommentInput
 }
 
 export type CommentUncheckedCreateWithoutTaskInput = {
@@ -727,6 +760,7 @@ export type CommentUncheckedCreateWithoutTaskInput = {
   body: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedCreateNestedManyWithoutCommentInput
 }
 
 export type CommentCreateOrConnectWithoutTaskInput = {
@@ -755,6 +789,66 @@ export type CommentUpdateManyWithWhereWithoutTaskInput = {
   data: Prisma.XOR<Prisma.CommentUpdateManyMutationInput, Prisma.CommentUncheckedUpdateManyWithoutTaskInput>
 }
 
+export type CommentCreateWithoutAttachmentsInput = {
+  id?: string
+  body: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project: Prisma.ProjectCreateNestedOneWithoutCommentsInput
+  backlogItem?: Prisma.BacklogItemCreateNestedOneWithoutCommentsInput
+  task?: Prisma.TaskCreateNestedOneWithoutCommentsInput
+  author: Prisma.UserCreateNestedOneWithoutCommentsInput
+}
+
+export type CommentUncheckedCreateWithoutAttachmentsInput = {
+  id?: string
+  projectId: string
+  backlogItemId?: string | null
+  taskId?: string | null
+  authorId: string
+  body: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CommentCreateOrConnectWithoutAttachmentsInput = {
+  where: Prisma.CommentWhereUniqueInput
+  create: Prisma.XOR<Prisma.CommentCreateWithoutAttachmentsInput, Prisma.CommentUncheckedCreateWithoutAttachmentsInput>
+}
+
+export type CommentUpsertWithoutAttachmentsInput = {
+  update: Prisma.XOR<Prisma.CommentUpdateWithoutAttachmentsInput, Prisma.CommentUncheckedUpdateWithoutAttachmentsInput>
+  create: Prisma.XOR<Prisma.CommentCreateWithoutAttachmentsInput, Prisma.CommentUncheckedCreateWithoutAttachmentsInput>
+  where?: Prisma.CommentWhereInput
+}
+
+export type CommentUpdateToOneWithWhereWithoutAttachmentsInput = {
+  where?: Prisma.CommentWhereInput
+  data: Prisma.XOR<Prisma.CommentUpdateWithoutAttachmentsInput, Prisma.CommentUncheckedUpdateWithoutAttachmentsInput>
+}
+
+export type CommentUpdateWithoutAttachmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneRequiredWithoutCommentsNestedInput
+  backlogItem?: Prisma.BacklogItemUpdateOneWithoutCommentsNestedInput
+  task?: Prisma.TaskUpdateOneWithoutCommentsNestedInput
+  author?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
+}
+
+export type CommentUncheckedUpdateWithoutAttachmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  backlogItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type CommentCreateManyAuthorInput = {
   id?: string
   projectId: string
@@ -773,6 +867,7 @@ export type CommentUpdateWithoutAuthorInput = {
   project?: Prisma.ProjectUpdateOneRequiredWithoutCommentsNestedInput
   backlogItem?: Prisma.BacklogItemUpdateOneWithoutCommentsNestedInput
   task?: Prisma.TaskUpdateOneWithoutCommentsNestedInput
+  attachments?: Prisma.CommentAttachmentUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateWithoutAuthorInput = {
@@ -783,6 +878,7 @@ export type CommentUncheckedUpdateWithoutAuthorInput = {
   body?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateManyWithoutAuthorInput = {
@@ -813,6 +909,7 @@ export type CommentUpdateWithoutProjectInput = {
   backlogItem?: Prisma.BacklogItemUpdateOneWithoutCommentsNestedInput
   task?: Prisma.TaskUpdateOneWithoutCommentsNestedInput
   author?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
+  attachments?: Prisma.CommentAttachmentUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateWithoutProjectInput = {
@@ -823,6 +920,7 @@ export type CommentUncheckedUpdateWithoutProjectInput = {
   body?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateManyWithoutProjectInput = {
@@ -853,6 +951,7 @@ export type CommentUpdateWithoutBacklogItemInput = {
   project?: Prisma.ProjectUpdateOneRequiredWithoutCommentsNestedInput
   task?: Prisma.TaskUpdateOneWithoutCommentsNestedInput
   author?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
+  attachments?: Prisma.CommentAttachmentUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateWithoutBacklogItemInput = {
@@ -863,6 +962,7 @@ export type CommentUncheckedUpdateWithoutBacklogItemInput = {
   body?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateManyWithoutBacklogItemInput = {
@@ -893,6 +993,7 @@ export type CommentUpdateWithoutTaskInput = {
   project?: Prisma.ProjectUpdateOneRequiredWithoutCommentsNestedInput
   backlogItem?: Prisma.BacklogItemUpdateOneWithoutCommentsNestedInput
   author?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
+  attachments?: Prisma.CommentAttachmentUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateWithoutTaskInput = {
@@ -903,6 +1004,7 @@ export type CommentUncheckedUpdateWithoutTaskInput = {
   body?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.CommentAttachmentUncheckedUpdateManyWithoutCommentNestedInput
 }
 
 export type CommentUncheckedUpdateManyWithoutTaskInput = {
@@ -915,6 +1017,35 @@ export type CommentUncheckedUpdateManyWithoutTaskInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type CommentCountOutputType
+ */
+
+export type CommentCountOutputType = {
+  attachments: number
+}
+
+export type CommentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attachments?: boolean | CommentCountOutputTypeCountAttachmentsArgs
+}
+
+/**
+ * CommentCountOutputType without action
+ */
+export type CommentCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommentCountOutputType
+   */
+  select?: Prisma.CommentCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CommentCountOutputType without action
+ */
+export type CommentCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommentAttachmentWhereInput
+}
 
 
 export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -930,6 +1061,8 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   backlogItem?: boolean | Prisma.Comment$backlogItemArgs<ExtArgs>
   task?: boolean | Prisma.Comment$taskArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  attachments?: boolean | Prisma.Comment$attachmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.CommentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
 
 export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -979,6 +1112,8 @@ export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   backlogItem?: boolean | Prisma.Comment$backlogItemArgs<ExtArgs>
   task?: boolean | Prisma.Comment$taskArgs<ExtArgs>
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  attachments?: boolean | Prisma.Comment$attachmentsArgs<ExtArgs>
+  _count?: boolean | Prisma.CommentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CommentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -1000,6 +1135,7 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     backlogItem: Prisma.$BacklogItemPayload<ExtArgs> | null
     task: Prisma.$TaskPayload<ExtArgs> | null
     author: Prisma.$UserPayload<ExtArgs>
+    attachments: Prisma.$CommentAttachmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1408,6 +1544,7 @@ export interface Prisma__CommentClient<T, Null = never, ExtArgs extends runtime.
   backlogItem<T extends Prisma.Comment$backlogItemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Comment$backlogItemArgs<ExtArgs>>): Prisma.Prisma__BacklogItemClient<runtime.Types.Result.GetResult<Prisma.$BacklogItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   task<T extends Prisma.Comment$taskArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Comment$taskArgs<ExtArgs>>): Prisma.Prisma__TaskClient<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   author<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  attachments<T extends Prisma.Comment$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Comment$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1881,6 +2018,30 @@ export type Comment$taskArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   include?: Prisma.TaskInclude<ExtArgs> | null
   where?: Prisma.TaskWhereInput
+}
+
+/**
+ * Comment.attachments
+ */
+export type Comment$attachmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommentAttachment
+   */
+  select?: Prisma.CommentAttachmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommentAttachment
+   */
+  omit?: Prisma.CommentAttachmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommentAttachmentInclude<ExtArgs> | null
+  where?: Prisma.CommentAttachmentWhereInput
+  orderBy?: Prisma.CommentAttachmentOrderByWithRelationInput | Prisma.CommentAttachmentOrderByWithRelationInput[]
+  cursor?: Prisma.CommentAttachmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommentAttachmentScalarFieldEnum | Prisma.CommentAttachmentScalarFieldEnum[]
 }
 
 /**

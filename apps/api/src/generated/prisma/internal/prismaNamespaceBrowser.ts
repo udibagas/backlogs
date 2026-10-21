@@ -66,6 +66,7 @@ export const ModelName = {
   TaskDependency: 'TaskDependency',
   WorkflowColumn: 'WorkflowColumn',
   Comment: 'Comment',
+  CommentAttachment: 'CommentAttachment',
   Activity: 'Activity',
   SprintEvent: 'SprintEvent',
   RetrospectiveAction: 'RetrospectiveAction'
@@ -294,6 +295,19 @@ export const CommentScalarFieldEnum = {
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
+
+
+export const CommentAttachmentScalarFieldEnum = {
+  id: 'id',
+  commentId: 'commentId',
+  originalName: 'originalName',
+  storedName: 'storedName',
+  mimeType: 'mimeType',
+  size: 'size',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentAttachmentScalarFieldEnum = (typeof CommentAttachmentScalarFieldEnum)[keyof typeof CommentAttachmentScalarFieldEnum]
 
 
 export const ActivityScalarFieldEnum = {

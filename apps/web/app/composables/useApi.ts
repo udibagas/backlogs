@@ -5,8 +5,9 @@ interface SessionResponse {
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
-  body?: Record<string, unknown>;
+  body?: Record<string, unknown> | FormData;
   query?: Record<string, string | number | undefined>;
+  responseType?: "blob";
 }
 
 export function useApi() {
@@ -21,6 +22,7 @@ export function useApi() {
       method: options.method,
       body: options.body,
       query: options.query,
+      responseType: options.responseType,
       headers,
       credentials: "include"
     });

@@ -23,12 +23,6 @@ interface BacklogResponse {
   data: BacklogItem[];
   pagination: { total: number; pages: number };
 }
-interface Comment {
-  id: string;
-  body: string;
-  createdAt: string;
-  author: { name: string };
-}
 const route = useRoute();
 const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
@@ -37,11 +31,7 @@ const members = ref<ProjectMember[]>([]);
 const search = ref("");
 const errorMessage = ref("");
 const loading = ref(true);
-const comments = ref<Comment[]>([]);
-const newComment = ref("");
-const dependencyTarget = ref("");
 const editorOpen = ref(false);
-const editing = ref<BacklogItem | null>(null);
 
 async function load() {
   loading.value = true;
@@ -62,20 +52,6 @@ async function load() {
   }
 }
 function openCreate() {
-  editing.value = null;
-  editorOpen.value = true;
-}
-async function openEdit(item: BacklogItem) {
-  editing.value = item;
-  dependencyTarget.value = "";
-  newComment.value = "";
-  try {
-    comments.value = await request<Comment[]>(
-      `/projects/${projectId.value}/items/${item.id}/comments`
-    );
-  } catch (error) {
-    errorMessage.value = useErrorMessage(error);
-  }
   editorOpen.value = true;
 }
 async function changeAssignee(item: BacklogItem, assigneeId: string | null) {
@@ -94,49 +70,6 @@ async function changeStatus(item: BacklogItem, status: string) {
   try {
     await request(`/backlog-items/${item.id}/status`, { method: "PATCH", body: { status } });
     await load();
-  } catch (error) {
-    errorMessage.value = useErrorMessage(error);
-  }
-}
-async function addDependency() {
-  if (!editing.value || !dependencyTarget.value) return;
-  try {
-    await request(`/backlog-items/${editing.value.id}/dependencies`, {
-      method: "POST",
-      body: { dependsOnId: dependencyTarget.value }
-    });
-    await load();
-    const refreshed = items.value.find((item) => item.id === editing.value?.id);
-    if (refreshed) editing.value = refreshed;
-    dependencyTarget.value = "";
-  } catch (error) {
-    errorMessage.value = useErrorMessage(error);
-  }
-}
-async function removeDependency(dependsOnId: string) {
-  if (!editing.value) return;
-  try {
-    await request(`/backlog-items/${editing.value.id}/dependencies/${dependsOnId}`, {
-      method: "DELETE"
-    });
-    await load();
-    const refreshed = items.value.find((item) => item.id === editing.value?.id);
-    if (refreshed) editing.value = refreshed;
-  } catch (error) {
-    errorMessage.value = useErrorMessage(error);
-  }
-}
-async function addComment() {
-  if (!editing.value || !newComment.value.trim()) return;
-  try {
-    await request(`/projects/${projectId.value}/comments`, {
-      method: "POST",
-      body: { backlogItemId: editing.value.id, body: newComment.value.trim() }
-    });
-    comments.value = await request<Comment[]>(
-      `/projects/${projectId.value}/items/${editing.value.id}/comments`
-    );
-    newComment.value = "";
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   }
@@ -188,9 +121,12 @@ watch(projectId, load);
         </template>
         <el-table-column label="Item" min-width="280">
           <template #default="{ row }">
-            <el-link type="primary" underline="never" @click="openEdit(row as BacklogItem)">
+            <NuxtLink
+              :to="`/projects/${projectId}/backlog/${row.id}`"
+              class="text-(--el-color-primary) no-underline"
+            >
               {{ row.identifier }}
-            </el-link>
+            </NuxtLink>
             <p class="mt-1 max-w-md font-medium">{{ row.title }}</p>
             <p v-if="row.description" class="muted mt-1 line-clamp-1 max-w-md text-xs">
               {{ row.description }}
@@ -270,89 +206,9 @@ watch(projectId, load);
       v-model="editorOpen"
       :project-id="projectId"
       :members="members"
-      :item="editing"
+      :item="null"
       @saved="load"
       @error="errorMessage = $event"
-    >
-      <template #details>
-        <div v-if="editing" class="mb-4">
-          <h3 class="mb-2 text-sm font-semibold">Dependencies</h3>
-          <ul v-if="editing.dependencies.length" class="m-0 mb-3 list-none space-y-2 p-0">
-            <li
-              v-for="dependency in editing.dependencies"
-              :key="dependency.dependsOn.id"
-              class="flex items-center gap-3 rounded-md px-3 py-2 text-sm"
-              style="background: var(--el-fill-color-light)"
-            >
-              <span class="min-w-0 flex-1 truncate">{{ dependency.dependsOn.title }}</span>
-              <el-tag size="small" type="info">{{
-                dependency.dependsOn.status.replaceAll("_", " ").toLowerCase()
-              }}</el-tag>
-              <el-button
-                link
-                type="danger"
-                size="small"
-                @click="removeDependency(dependency.dependsOn.id)"
-              >
-                Remove
-              </el-button>
-            </li>
-          </ul>
-          <div class="flex flex-col gap-2 sm:flex-row">
-            <el-select
-              v-model="dependencyTarget"
-              class="flex-1"
-              placeholder="Select an item this work depends on"
-              aria-label="Add dependency"
-              filterable
-            >
-              <el-option
-                v-for="item in items.filter(
-                  (candidate) =>
-                    candidate.id !== editing?.id &&
-                    !editing?.dependencies.some(
-                      (dependency) => dependency.dependsOn.id === candidate.id
-                    )
-                )"
-                :key="item.id"
-                :label="`${item.identifier} · ${item.title}`"
-                :value="item.id"
-              />
-            </el-select>
-            <el-button :disabled="!dependencyTarget" @click="addDependency">
-              Add dependency
-            </el-button>
-          </div>
-        </div>
-
-        <div v-if="editing" class="mb-2">
-          <h3 class="mb-2 text-sm font-semibold">Discussion</h3>
-          <ul
-            v-if="comments.length"
-            class="m-0 mb-3 max-h-48 list-none space-y-3 overflow-y-auto rounded-lg p-3"
-            style="background: var(--el-fill-color-light)"
-          >
-            <li v-for="comment in comments" :key="comment.id">
-              <p class="whitespace-pre-wrap text-sm">{{ comment.body }}</p>
-              <p class="muted mt-1 text-xs">
-                {{ comment.author.name }} · {{ new Date(comment.createdAt).toLocaleString() }}
-              </p>
-            </li>
-          </ul>
-          <p v-else class="muted mb-3 text-sm">No comments yet.</p>
-          <el-input
-            v-model="newComment"
-            type="textarea"
-            :rows="2"
-            maxlength="5000"
-            aria-label="Add comment"
-            placeholder="Share a clarification or update"
-          />
-          <el-button class="mt-2" :disabled="!newComment.trim()" @click="addComment">
-            Add comment
-          </el-button>
-        </div>
-      </template>
-    </BacklogItemForm>
+    />
   </div>
 </template>

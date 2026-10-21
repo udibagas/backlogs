@@ -16,6 +16,7 @@ import {
   Matches,
   Min
 } from "class-validator";
+import { Type } from "class-transformer";
 import {
   BacklogStatus,
   BacklogType,
@@ -336,9 +337,10 @@ export class CreateCommentDto {
   @IsUUID()
   taskId?: string;
 
+  @IsOptional()
   @IsString()
-  @Length(1, 5000)
-  body!: string;
+  @Length(0, 5000)
+  body?: string;
 }
 
 export class CreateDependencyDto {
@@ -365,11 +367,13 @@ export class ListBacklogQuery {
   type?: BacklogType;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page = 1;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)

@@ -32,6 +32,7 @@ const sprints = ref<Sprint[]>([]);
 const backlog = ref<BacklogItem[]>([]);
 const selected = ref<Record<string, string>>({});
 const form = reactive({ name: "", goal: "", startsAt: "", endsAt: "" });
+const createDialogOpen = ref(false);
 const outcome = ref("");
 const eventType = ref<Record<string, string>>({});
 const eventNotes = ref<Record<string, string>>({});
@@ -40,6 +41,11 @@ const actionDescription = ref<Record<string, string>>({});
 const errorMessage = ref("");
 const loading = ref(true);
 const saving = ref(false);
+
+function openCreateSprint() {
+  errorMessage.value = "";
+  createDialogOpen.value = true;
+}
 
 async function load() {
   loading.value = true;
@@ -79,6 +85,7 @@ async function createSprint() {
       }
     });
     Object.assign(form, { name: "", goal: "", startsAt: "", endsAt: "" });
+    createDialogOpen.value = false;
     await load();
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
@@ -174,11 +181,34 @@ watch(projectId, load);
           Plan a goal together, then select a realistic amount of work.
         </p>
       </div>
+      <el-button type="primary" @click="openCreateSprint">Plan a Sprint</el-button>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
-    <el-card shadow="never" class="mb-6">
-      <h2 class="section-title">Plan a Sprint</h2>
-      <el-form class="form-stack mt-4" label-position="top" @submit.prevent="createSprint">
+    <el-alert
+      v-if="errorMessage && !createDialogOpen"
+      :title="errorMessage"
+      type="error"
+      show-icon
+      class="mb-5"
+    />
+    <el-dialog
+      v-model="createDialogOpen"
+      title="Plan a Sprint"
+      width="600px"
+      append-to-body
+    >
+      <el-alert
+        v-if="errorMessage"
+        :title="errorMessage"
+        type="error"
+        show-icon
+        class="mb-4"
+      />
+      <el-form
+        id="create-sprint-form"
+        class="form-stack"
+        label-position="top"
+        @submit.prevent="createSprint"
+      >
         <el-row :gutter="16">
           <el-col :span="24">
             <el-form-item label="Sprint name">
@@ -215,11 +245,19 @@ watch(projectId, load);
             </el-form-item>
           </el-col>
         </el-row>
-        <el-button type="primary" native-type="submit" :loading="saving">
+      </el-form>
+      <template #footer>
+        <el-button @click="createDialogOpen = false">Cancel</el-button>
+        <el-button
+          type="primary"
+          native-type="submit"
+          form="create-sprint-form"
+          :loading="saving"
+        >
           Create planned Sprint
         </el-button>
-      </el-form>
-    </el-card>
+      </template>
+    </el-dialog>
     <el-skeleton v-if="loading" :rows="5" animated />
     <div v-else class="space-y-4">
       <el-card v-for="sprint in sprints" :key="sprint.id" shadow="never">
@@ -326,7 +364,7 @@ watch(projectId, load);
         </div>
         <el-alert
           v-if="sprint.status === 'ACTIVE'"
-          class="mt-5"
+          class="mt-5!"
           title="Sprint Goal"
           :description="sprint.goal"
           type="success"

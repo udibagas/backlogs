@@ -18,7 +18,10 @@ const projectLinks = computed(() =>
 const isLogin = computed(() => route.path === "/login");
 const activePath = computed(() => {
   const path = route.path;
-  if (projectId.value) return path;
+  if (projectId.value) {
+    const backlogPath = `/projects/${projectId.value}/backlog`;
+    return path.startsWith(`${backlogPath}/`) ? backlogPath : path;
+  }
   return path === "/" ? "/" : "/" + path.split("/")[1];
 });
 
