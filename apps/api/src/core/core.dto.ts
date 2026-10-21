@@ -34,6 +34,12 @@ export class CreateOrganizationDto {
   name!: string;
 }
 
+export class UpdateOrganizationDto {
+  @IsString()
+  @Length(2, 100)
+  name!: string;
+}
+
 export class CreateProjectDto {
   @IsString()
   @Length(2, 120)

@@ -33,6 +33,7 @@ import type {
   CreateSprintDto,
   CreateTaskDto,
   ListBacklogQuery,
+  UpdateOrganizationDto,
   UpdateRetrospectiveActionDto,
   UpdateBacklogDto,
   UpdateProjectDto,
@@ -96,6 +97,47 @@ export class CoreService {
       },
       include: { memberships: { where: { userId }, select: { role: true } } }
     });
+  }
+
+  async updateOrganization(
+    userId: string,
+    organizationId: string,
+    dto: UpdateOrganizationDto
+  ) {
+    const membership = await this.prisma.organizationMembership.findUnique({
+      where: { organizationId_userId: { organizationId, userId } }
+    });
+    if (!membership) throw new NotFoundException("Organization not found");
+    if (membership.role !== OrganizationRole.OWNER && membership.role !== OrganizationRole.ADMIN) {
+      throw new ForbiddenException("Only organization owners and admins can update the organization");
+    }
+    return this.prisma.organization.update({
+      where: { id: organizationId },
+      data: { name: dto.name.trim() },
+      include: {
+        memberships: { where: { userId }, select: { role: true } },
+        _count: { select: { projects: true } }
+      }
+    });
+  }
+
+  async deleteOrganization(userId: string, organizationId: string) {
+    const membership = await this.prisma.organizationMembership.findUnique({
+      where: { organizationId_userId: { organizationId, userId } }
+    });
+    if (!membership) throw new NotFoundException("Organization not found");
+    if (membership.role !== OrganizationRole.OWNER) {
+      throw new ForbiddenException("Only organization owners can delete the organization");
+    }
+    const organization = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+      select: { _count: { select: { projects: true } } }
+    });
+    if (organization._count.projects > 0) {
+      throw new ConflictException("Organizations with projects cannot be deleted");
+    }
+    await this.prisma.organization.delete({ where: { id: organizationId } });
+    return { success: true };
   }
 
   async projects(userId: string) {

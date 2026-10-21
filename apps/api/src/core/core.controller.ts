@@ -41,6 +41,7 @@ import {
   CreateTaskDto,
   ListBacklogQuery,
   UpdateBacklogDto,
+  UpdateOrganizationDto,
   UpdateProjectDto,
   UpdateRetrospectiveActionDto,
   UpdateSprintDto,
@@ -65,6 +66,20 @@ export class CoreController {
   @Post("organizations")
   createOrganization(@CurrentUser() user: AuthUser, @Body() dto: CreateOrganizationDto) {
     return this.core.createOrganization(user.sub, dto);
+  }
+
+  @Patch("organizations/:organizationId")
+  updateOrganization(
+    @CurrentUser() user: AuthUser,
+    @Param("organizationId") organizationId: string,
+    @Body() dto: UpdateOrganizationDto
+  ) {
+    return this.core.updateOrganization(user.sub, organizationId, dto);
+  }
+
+  @Delete("organizations/:organizationId")
+  deleteOrganization(@CurrentUser() user: AuthUser, @Param("organizationId") organizationId: string) {
+    return this.core.deleteOrganization(user.sub, organizationId);
   }
 
   @Get("projects")
