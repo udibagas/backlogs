@@ -213,7 +213,7 @@ export class UpdateBacklogDto {
 
   @IsOptional()
   @IsDateString()
-  dueDate?: string;
+  dueDate?: string | null;
 
   @IsOptional()
   @IsArray()

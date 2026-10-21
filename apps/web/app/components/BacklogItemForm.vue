@@ -9,6 +9,7 @@ interface BacklogItem {
   type: string;
   priority: string;
   estimate: number | null;
+  dueDate?: string | null;
   storyRole: string | null;
   storyCapability: string | null;
   storyBenefit: string | null;
@@ -41,6 +42,7 @@ const form = reactive({
   type: "USER_STORY",
   priority: "MEDIUM",
   estimate: "",
+  dueDate: "",
   storyRole: "",
   storyCapability: "",
   storyBenefit: "",
@@ -65,6 +67,7 @@ function resetForm(item: BacklogItem | null) {
     type: item?.type ?? "USER_STORY",
     priority: item?.priority ?? "MEDIUM",
     estimate: item?.estimate?.toString() ?? "",
+    dueDate: item?.dueDate?.slice(0, 10) ?? "",
     storyRole: item?.storyRole ?? "",
     storyCapability: item?.storyCapability ?? "",
     storyBenefit: item?.storyBenefit ?? "",
@@ -96,6 +99,7 @@ async function saveItem() {
       type: form.type,
       priority: form.priority,
       estimate: form.estimate ? Number(form.estimate) : undefined,
+      dueDate: form.dueDate || (props.item ? null : undefined),
       storyRole: form.storyRole || undefined,
       storyCapability: form.storyCapability || undefined,
       storyBenefit: form.storyBenefit || undefined,
@@ -184,6 +188,17 @@ async function saveItem() {
       </template>
       <el-form-item label="Estimate (points)">
         <el-input v-model="form.estimate" type="number" min="0" max="1000" step="0.5" />
+      </el-form-item>
+      <el-form-item label="Due date">
+        <el-date-picker
+          v-model="form.dueDate"
+          type="date"
+          value-format="YYYY-MM-DD"
+          format="MMM D, YYYY"
+          placeholder="Select a due date"
+          clearable
+          class="w-full"
+        />
       </el-form-item>
       <el-form-item label="Assignee">
         <el-select

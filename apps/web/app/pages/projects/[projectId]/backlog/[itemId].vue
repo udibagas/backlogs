@@ -23,6 +23,7 @@ interface BacklogItem {
   tasks: {
     id: string;
     title: string;
+    description: string;
     status: string;
     priority: string;
     estimate: number | null;
@@ -68,12 +69,23 @@ const comments = ref<Comment[]>([]);
 const dependencyTarget = ref("");
 const newComment = ref("");
 const pendingFiles = ref<File[]>([]);
+const taskForm = reactive({
+  title: "",
+  description: "",
+  status: "TODO",
+  priority: "MEDIUM",
+  estimate: "",
+  assigneeId: ""
+});
 const attachmentInput = ref<HTMLInputElement | null>(null);
 const commentSaving = ref(false);
+const taskSaving = ref(false);
 const downloadingAttachmentId = ref("");
 const errorMessage = ref("");
 const loading = ref(true);
 const editorOpen = ref(false);
+const taskDialogOpen = ref(false);
+const editingTaskId = ref<string | null>(null);
 
 const statuses = ["BACKLOG", "READY", "IN_PROGRESS", "IN_REVIEW", "TESTING", "DONE"];
 const availableDependencies = computed(() =>
@@ -155,6 +167,56 @@ async function removeDependency(dependsOnId: string) {
     await load();
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
+  }
+}
+
+function openTaskDialog(task?: BacklogItem["tasks"][number]) {
+  editingTaskId.value = task?.id ?? null;
+  Object.assign(taskForm, {
+    title: task?.title ?? "",
+    description: task?.description ?? "",
+    status: task?.status ?? "TODO",
+    priority: task?.priority ?? "MEDIUM",
+    estimate: task?.estimate == null ? "" : String(task.estimate),
+    assigneeId: task?.assignee?.id ?? ""
+  });
+  errorMessage.value = "";
+  taskDialogOpen.value = true;
+}
+
+async function saveTask() {
+  errorMessage.value = "";
+  const title = taskForm.title.trim();
+  const estimate = taskForm.estimate ? Number(taskForm.estimate) : null;
+  if (
+    title.length < 2 ||
+    (estimate !== null && (!Number.isFinite(estimate) || estimate < 0 || estimate > 1000))
+  ) {
+    errorMessage.value = "Enter a task title and a non-negative estimate up to 1000.";
+    return;
+  }
+  taskSaving.value = true;
+  try {
+    const body = {
+      title,
+      description: taskForm.description,
+      status: taskForm.status,
+      priority: taskForm.priority,
+      estimate,
+      assigneeId: taskForm.assigneeId || null,
+      ...(!editingTaskId.value && { backlogItemId: itemId.value })
+    };
+    if (editingTaskId.value) {
+      await request(`/tasks/${editingTaskId.value}`, { method: "PATCH", body });
+    } else {
+      await request(`/projects/${projectId.value}/tasks`, { method: "POST", body });
+    }
+    taskDialogOpen.value = false;
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    taskSaving.value = false;
   }
 }
 
@@ -258,18 +320,26 @@ watch([projectId, itemId], load);
             >
             · {{ item.identifier }}
           </p>
-          <h1 class="page-title break-words">{{ item.title }}</h1>
+          <h1 class="page-title wrap-break-word">{{ item.title }}</h1>
           <p class="muted mt-2 text-sm">
             {{ item.type.replaceAll("_", " ").toLowerCase() }} ·
             {{ item.priority.toLowerCase() }} priority
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <el-button @click="navigateTo(`/projects/${projectId}/backlog`)">Back to backlog</el-button>
+          <el-button @click="navigateTo(`/projects/${projectId}/backlog`)"
+            >Back to backlog</el-button
+          >
           <el-button type="primary" @click="editorOpen = true">Edit item</el-button>
         </div>
       </header>
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
+      <el-alert
+        v-if="errorMessage && !taskDialogOpen"
+        :title="errorMessage"
+        type="error"
+        show-icon
+        class="mb-5"
+      />
 
       <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div class="space-y-5">
@@ -322,24 +392,29 @@ watch([projectId, itemId], load);
           <el-card shadow="never">
             <div class="flex items-center justify-between gap-3">
               <h2 class="section-title">Tasks</h2>
-              <el-button
-                link
-                type="primary"
-                @click="navigateTo(`/projects/${projectId}/tasks`)"
-                >View project tasks</el-button
-              >
+              <el-button type="primary" @click="openTaskDialog()">Add task</el-button>
             </div>
-            <ul v-if="item.tasks.length" class="m-0 mt-4 list-none divide-y p-0">
+            <ul v-if="item.tasks.length" class="m-0 mt-2 list-none divide-y p-0">
               <li
                 v-for="task in item.tasks"
                 :key="task.id"
-                class="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                class="flex flex-wrap items-center justify-between gap-3 py-3"
               >
-                <span class="font-medium">{{ task.title }}</span>
-                <div class="flex items-center gap-2">
-                  <span class="muted">{{ task.assignee?.name ?? "Unassigned" }}</span>
-                  <el-tag size="small" type="info">{{ formatStatus(task.status) }}</el-tag>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium">{{ task.title }}</p>
+                  <p v-if="task.description" class="muted mt-1 text-xs">
+                    {{ task.description }}
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <el-tag size="small" type="info">{{ formatStatus(task.status) }}</el-tag>
+                    <el-tag size="small">{{ task.priority.toLowerCase() }}</el-tag>
+                    <span class="muted text-xs">{{ task.assignee?.name ?? "Unassigned" }}</span>
+                    <span v-if="task.estimate !== null" class="muted text-xs">
+                      {{ task.estimate }} points
+                    </span>
+                  </div>
                 </div>
+                <el-button size="small" @click="openTaskDialog(task)">Edit</el-button>
               </li>
             </ul>
             <p v-else class="muted mt-3 text-sm">No tasks are linked to this item yet.</p>
@@ -473,9 +548,7 @@ watch([projectId, itemId], load);
               </div>
               <div class="flex items-center justify-between text-sm">
                 <span class="muted">Due date</span>
-                <span>{{
-                  item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "—"
-                }}</span>
+                <span>{{ item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "—" }}</span>
               </div>
               <div v-if="item.labels.length">
                 <p class="muted mb-2 text-xs">Labels</p>
@@ -604,5 +677,87 @@ watch([projectId, itemId], load);
       @saved="load"
       @error="errorMessage = $event"
     />
+    <el-dialog
+      v-model="taskDialogOpen"
+      :title="editingTaskId ? 'Edit task' : 'Add task'"
+      width="600px"
+      append-to-body
+    >
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-form
+        id="backlog-item-task-form"
+        class="form-stack"
+        label-position="top"
+        @submit.prevent="saveTask"
+      >
+        <el-form-item label="Task title">
+          <el-input v-model="taskForm.title" maxlength="240" placeholder="Add automated tests" />
+        </el-form-item>
+        <el-form-item label="Description">
+          <el-input v-model="taskForm.description" type="textarea" :rows="3" maxlength="10000" />
+        </el-form-item>
+        <el-row :gutter="12">
+          <el-col :sm="12" :xs="24">
+            <el-form-item label="Status">
+              <el-select v-model="taskForm.status" class="w-full">
+                <el-option
+                  v-for="status in [
+                    'TODO',
+                    'IN_PROGRESS',
+                    'IN_REVIEW',
+                    'TESTING',
+                    'BLOCKED',
+                    'DONE'
+                  ]"
+                  :key="status"
+                  :label="formatStatus(status)"
+                  :value="status"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12" :xs="24">
+            <el-form-item label="Priority">
+              <el-select v-model="taskForm.priority" class="w-full">
+                <el-option
+                  v-for="priority in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']"
+                  :key="priority"
+                  :label="priority"
+                  :value="priority"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12" :xs="24">
+            <el-form-item label="Estimate">
+              <el-input v-model="taskForm.estimate" type="number" min="0" max="1000" step="0.5" />
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12" :xs="24">
+            <el-form-item label="Assignee">
+              <el-select v-model="taskForm.assigneeId" class="w-full" clearable filterable>
+                <el-option
+                  v-for="member in members"
+                  :key="member.userId"
+                  :label="member.user.name"
+                  :value="member.userId"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <el-button @click="taskDialogOpen = false">Cancel</el-button>
+        <el-button
+          type="primary"
+          native-type="submit"
+          form="backlog-item-task-form"
+          :loading="taskSaving"
+        >
+          {{ editingTaskId ? "Save task" : "Add task" }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>

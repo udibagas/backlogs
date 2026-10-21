@@ -524,7 +524,7 @@ export class CoreService {
           title: dto.title?.trim(),
           description: dto.description?.trim(),
           labels: dto.labels?.map((label) => label.trim()).filter(Boolean),
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined
+          dueDate: dto.dueDate === null ? null : dto.dueDate ? new Date(dto.dueDate) : undefined
         },
         include: { project: { select: { key: true } }, criteria: { orderBy: { order: "asc" } } }
       });
