@@ -151,14 +151,16 @@ watch(projectId, load);
             draggable="true"
             @dragstart="dragStart($event, card.id)"
           >
-            <div class="flex items-start justify-between gap-2">
-              <span class="text-[11px] font-semibold" style="color: var(--el-color-primary)">{{
-                card.identifier
-              }}</span>
-              <el-tag size="small" type="info">{{
-                card.type.replaceAll("_", " ").toLowerCase()
-              }}</el-tag>
-            </div>
+            <template #header>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-[11px] font-semibold" style="color: var(--el-color-primary)">{{
+                  card.identifier
+                }}</span>
+                <el-tag size="small" type="info">{{
+                  card.type.replaceAll("_", " ").toLowerCase()
+                }}</el-tag>
+              </div>
+            </template>
             <NuxtLink
               :to="`/projects/${projectId}/backlog`"
               class="mt-2 block text-sm font-medium leading-snug"

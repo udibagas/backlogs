@@ -125,7 +125,8 @@ watch([projectId, sprintId], load);
         <el-row :gutter="16" class="mb-5">
           <el-col :sm="8" :xs="24" class="mb-4">
             <el-card shadow="never">
-              <el-statistic title="Backlog items" :value="sprint.items.length">
+              <template #header><span class="text-sm font-medium">Backlog items</span></template>
+              <el-statistic :value="sprint.items.length">
                 <template #suffix>
                   <span class="muted text-sm"> · {{ completedItems }} done</span>
                 </template>
@@ -134,13 +135,15 @@ watch([projectId, sprintId], load);
           </el-col>
           <el-col :sm="8" :xs="24" class="mb-4">
             <el-card shadow="never">
-              <el-statistic title="Planned points" :value="plannedPoints" />
+              <template #header><span class="text-sm font-medium">Planned points</span></template>
+              <el-statistic :value="plannedPoints" />
               <p class="muted mt-1 text-xs">{{ completedPoints }} points completed</p>
             </el-card>
           </el-col>
           <el-col :sm="8" :xs="24" class="mb-4">
             <el-card shadow="never">
-              <el-statistic title="Completion" :value="completionPercentage">
+              <template #header><span class="text-sm font-medium">Completion</span></template>
+              <el-statistic :value="completionPercentage">
                 <template #suffix><span class="muted text-sm">%</span></template>
               </el-statistic>
               <el-progress
@@ -156,7 +159,7 @@ watch([projectId, sprintId], load);
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div class="space-y-5">
             <el-card shadow="never">
-              <h2 class="section-title">Sprint Goal</h2>
+              <template #header><h2 class="section-title">Sprint Goal</h2></template>
               <p class="mt-3 whitespace-pre-wrap text-sm">
                 {{ sprint.goal || "No Sprint Goal was set." }}
               </p>
@@ -171,10 +174,12 @@ watch([projectId, sprintId], load);
             </el-card>
 
             <el-card shadow="never">
-              <div class="mb-3 flex items-center justify-between gap-3">
+              <template #header>
+                <div class="flex items-center justify-between gap-3">
                 <h2 class="section-title">Sprint backlog</h2>
                 <span class="muted text-xs">{{ sprint.items.length }} items</span>
-              </div>
+                </div>
+              </template>
               <ul v-if="sprint.items.length" class="m-0 list-none p-0">
                 <li
                   v-for="item in sprint.items"
@@ -204,10 +209,12 @@ watch([projectId, sprintId], load);
             </el-card>
 
             <el-card shadow="never">
-              <div class="mb-4 flex items-center justify-between gap-3">
+              <template #header>
+                <div class="flex items-center justify-between gap-3">
                 <h2 class="section-title">Events and notes</h2>
                 <span class="muted text-xs">{{ sprint.events.length }} events</span>
-              </div>
+                </div>
+              </template>
               <ul v-if="sprint.events.length" class="m-0 list-none space-y-3 p-0">
                 <li
                   v-for="event in sprint.events"
@@ -237,7 +244,7 @@ watch([projectId, sprintId], load);
 
           <aside class="space-y-5">
             <el-card shadow="never">
-              <h2 class="section-title mb-4">Timeline</h2>
+              <template #header><h2 class="section-title">Timeline</h2></template>
               <dl class="m-0 space-y-4">
                 <div>
                   <dt class="muted text-xs">Start date</dt>
@@ -255,7 +262,8 @@ watch([projectId, sprintId], load);
             </el-card>
 
             <el-card shadow="never">
-              <div class="mb-4 flex items-center justify-between gap-3">
+              <template #header>
+                <div class="flex items-center justify-between gap-3">
                 <h2 class="section-title">Retrospective actions</h2>
                 <el-tag size="small" effect="plain">
                   {{ sprint.actions.filter((action) => action.completedAt).length }}/{{
@@ -263,7 +271,8 @@ watch([projectId, sprintId], load);
                   }}
                   done
                 </el-tag>
-              </div>
+                </div>
+              </template>
               <ul v-if="sprint.actions.length" class="m-0 list-none space-y-3 p-0">
                 <li
                   v-for="action in sprint.actions"

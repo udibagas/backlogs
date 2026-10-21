@@ -42,14 +42,15 @@ onMounted(async () => {
     <el-row :gutter="16" class="mb-7">
       <el-col :sm="8" :xs="24" class="mb-4">
         <el-card shadow="never">
-          <el-statistic title="Active projects" :value="projects.length" />
+          <template #header><span class="text-sm font-medium">Active projects</span></template>
+          <el-statistic :value="projects.length" />
           <p class="muted mt-1 text-xs">Across your organizations</p>
         </el-card>
       </el-col>
       <el-col :sm="8" :xs="24" class="mb-4">
         <el-card shadow="never">
+          <template #header><span class="text-sm font-medium">Backlog items</span></template>
           <el-statistic
-            title="Backlog items"
             :value="projects.reduce((sum, project) => sum + project._count.backlogItems, 0)"
           />
           <p class="muted mt-1 text-xs">Priorities ready to refine</p>
@@ -57,8 +58,8 @@ onMounted(async () => {
       </el-col>
       <el-col :sm="8" :xs="24" class="mb-4">
         <el-card shadow="never">
+          <template #header><span class="text-sm font-medium">Tasks tracked</span></template>
           <el-statistic
-            title="Tasks tracked"
             :value="projects.reduce((sum, project) => sum + project._count.tasks, 0)"
           />
           <p class="muted mt-1 text-xs">Delivery work in the system</p>

@@ -59,19 +59,22 @@ watch(projectId, load);
       <el-row :gutter="16" class="mb-3">
         <el-col :sm="8" :xs="24" class="mb-4">
           <el-card shadow="never">
-            <el-statistic title="Backlog items" :value="total" />
+            <template #header><span class="text-sm font-medium">Backlog items</span></template>
+            <el-statistic :value="total" />
             <p class="muted mt-1 text-xs">Active items across all statuses</p>
           </el-card>
         </el-col>
         <el-col :sm="8" :xs="24" class="mb-4">
           <el-card shadow="never">
-            <el-statistic title="Tasks" :value="report.taskCount" />
+            <template #header><span class="text-sm font-medium">Tasks</span></template>
+            <el-statistic :value="report.taskCount" />
             <p class="muted mt-1 text-xs">Implementation work items</p>
           </el-card>
         </el-col>
         <el-col :sm="8" :xs="24" class="mb-4">
           <el-card shadow="never">
-            <el-statistic :title="'Current Sprint'"
+            <template #header><span class="text-sm font-medium">Current Sprint</span></template>
+            <el-statistic
               ><template #formatter
                 ><span class="text-xl">{{
                   report.activeSprint?.name ?? "None active"
@@ -86,7 +89,7 @@ watch(projectId, load);
       </el-row>
       <div class="grid gap-5 lg:grid-cols-2">
         <el-card shadow="never">
-          <h2 class="section-title">Items by status</h2>
+          <template #header><h2 class="section-title">Items by status</h2></template>
           <div class="mt-5 space-y-4">
             <div v-for="entry in report.backlogByStatus" :key="entry.status">
               <div class="mb-1 flex justify-between text-sm">
@@ -102,7 +105,7 @@ watch(projectId, load);
           </div>
         </el-card>
         <el-card shadow="never">
-          <h2 class="section-title">Items by priority</h2>
+          <template #header><h2 class="section-title">Items by priority</h2></template>
           <el-table
             v-if="report.backlogByPriority.length"
             :data="report.backlogByPriority"
@@ -116,7 +119,7 @@ watch(projectId, load);
           <el-empty v-else description="No priority data yet." />
         </el-card>
         <el-card shadow="never">
-          <h2 class="section-title">Items by type</h2>
+          <template #header><h2 class="section-title">Items by type</h2></template>
           <el-table v-if="report.backlogByType.length" :data="report.backlogByType" class="mt-3">
             <el-table-column label="Type">
               <template #default="{ row }">{{
@@ -128,7 +131,7 @@ watch(projectId, load);
           <el-empty v-else description="No backlog data yet." />
         </el-card>
         <el-card shadow="never">
-          <h2 class="section-title">Sprint progress</h2>
+          <template #header><h2 class="section-title">Sprint progress</h2></template>
           <template v-if="report.activeSprint">
             <p class="muted mt-2 text-sm">{{ report.activeSprint.goal }}</p>
             <el-progress

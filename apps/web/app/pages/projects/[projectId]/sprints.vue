@@ -306,7 +306,8 @@ watch(projectId, load);
     <el-skeleton v-if="loading" :rows="5" animated />
     <div v-else class="space-y-4">
       <el-card v-for="sprint in sprints" :key="sprint.id" shadow="never">
-        <div class="flex flex-wrap items-start justify-between gap-3">
+        <template #header>
+          <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="section-title">
@@ -367,7 +368,8 @@ watch(projectId, load);
               Complete Sprint
             </el-button>
           </div>
-        </div>
+          </div>
+        </template>
         <el-divider />
         <div>
           <div class="mb-3 flex items-center justify-between">

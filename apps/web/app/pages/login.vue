@@ -61,10 +61,14 @@ async function submit() {
         >sprintline<span class="text-[var(--el-color-primary)]">.</span></NuxtLink
       >
       <el-card shadow="never">
-        <h1 class="text-2xl font-semibold">
-          {{ mode === "login" ? "Welcome back" : "Create your account" }}
-        </h1>
-        <p class="muted mt-2 text-sm">A calm workspace for your team's next increment.</p>
+        <template #header>
+          <div>
+            <h1 class="text-2xl font-semibold">
+              {{ mode === "login" ? "Welcome back" : "Create your account" }}
+            </h1>
+            <p class="muted mt-2 text-sm">A calm workspace for your team's next increment.</p>
+          </div>
+        </template>
         <el-form class="mt-7" label-position="top" @submit.prevent="submit">
           <el-form-item v-if="mode === 'register'" label="Full name">
             <el-input v-model="name" autocomplete="name" maxlength="100" />

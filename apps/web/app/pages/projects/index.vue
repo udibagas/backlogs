@@ -93,8 +93,12 @@ onMounted(load);
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-card shadow="never" class="mb-6">
-      <h2 class="section-title">Start a project</h2>
-      <p class="muted mt-1 text-sm">Projects keep backlog, delivery, and reporting connected.</p>
+      <template #header>
+        <div>
+          <h2 class="section-title">Start a project</h2>
+          <p class="muted mt-1 text-sm">Projects keep backlog, delivery, and reporting connected.</p>
+        </div>
+      </template>
       <el-form class="form-stack mt-5" label-position="top" @submit.prevent="createProject">
         <el-row :gutter="16">
           <el-col :sm="12" :xs="24">
@@ -159,7 +163,9 @@ onMounted(load);
       </el-form>
     </el-card>
     <el-card shadow="never">
-      <h2 class="section-title mb-4">Your projects</h2>
+      <template #header>
+        <h2 class="section-title">Your projects</h2>
+      </template>
       <el-skeleton v-if="loading" :rows="3" animated />
       <el-empty
         v-else-if="!projects.length"

@@ -229,7 +229,7 @@ watch(projectId, load);
       </template>
     </el-dialog>
     <el-card shadow="never">
-      <div class="mb-4">
+      <template #header>
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="section-title">
@@ -259,7 +259,7 @@ watch(projectId, load);
             </el-button>
           </el-button-group>
         </div>
-      </div>
+      </template>
       <el-table
         v-if="displayMode === 'list'"
         v-loading="loading"
@@ -339,7 +339,9 @@ watch(projectId, load);
               draggable="true"
               @dragstart="dragStart($event, task.id)"
             >
-              <p class="text-sm font-medium">{{ task.title }}</p>
+              <template #header>
+                <p class="text-sm font-medium">{{ task.title }}</p>
+              </template>
               <p v-if="task.description" class="muted mt-1 line-clamp-2 text-xs">
                 {{ task.description }}
               </p>

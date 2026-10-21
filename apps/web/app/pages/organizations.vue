@@ -56,7 +56,9 @@ onMounted(load);
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-card shadow="never" class="mb-6">
-      <h2 class="section-title">Create an organization</h2>
+      <template #header>
+        <h2 class="section-title">Create an organization</h2>
+      </template>
       <form class="mt-4 flex flex-col gap-3 sm:flex-row" @submit.prevent="createOrganization">
         <el-input
           v-model="name"
@@ -74,7 +76,9 @@ onMounted(load);
       </p>
     </el-card>
     <el-card shadow="never">
-      <h2 class="section-title mb-4">Your organizations</h2>
+      <template #header>
+        <h2 class="section-title">Your organizations</h2>
+      </template>
       <el-skeleton v-if="loading" :rows="3" animated />
       <el-empty
         v-else-if="!organizations.length"
