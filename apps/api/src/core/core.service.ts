@@ -36,6 +36,7 @@ import type {
   UpdateRetrospectiveActionDto,
   UpdateBacklogDto,
   UpdateProjectDto,
+  UpdateSprintDto,
   UpdateTaskDto,
   UpdateWorkflowColumnDto
 } from "./core.dto";
@@ -765,6 +766,45 @@ export class CoreService {
         }
       });
       return sprint;
+    });
+  }
+
+  async updateSprint(userId: string, sprintId: string, dto: UpdateSprintDto) {
+    const sprint = await this.prisma.sprint.findUnique({ where: { id: sprintId } });
+    if (!sprint) throw new NotFoundException("Sprint not found");
+    const { role } = await this.projectAccess(userId, sprint.projectId);
+    this.requireManager(role);
+    if (sprint.status !== SprintStatus.PLANNING) {
+      throw new BadRequestException("Only a planned Sprint can be edited");
+    }
+    const dates = this.parseSprintDates(
+      dto.startsAt ?? sprint.startsAt?.toISOString(),
+      dto.endsAt ?? sprint.endsAt?.toISOString()
+    );
+    return this.prisma.$transaction(async (tx) => {
+      const current = await tx.sprint.findUnique({ where: { id: sprintId } });
+      if (!current || current.status !== SprintStatus.PLANNING) {
+        throw new BadRequestException("Only a planned Sprint can be edited");
+      }
+      const updated = await tx.sprint.update({
+        where: { id: sprintId },
+        data: {
+          name: dto.name?.trim(),
+          goal: dto.goal?.trim(),
+          ...dates
+        }
+      });
+      await tx.activity.create({
+        data: {
+          projectId: sprint.projectId,
+          actorId: userId,
+          action: "sprint.updated",
+          entityType: "Sprint",
+          entityId: sprintId,
+          details: { name: updated.name }
+        }
+      });
+      return updated;
     });
   }
 

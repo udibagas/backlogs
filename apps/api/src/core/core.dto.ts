@@ -241,6 +241,26 @@ export class CreateSprintDto {
   endsAt?: string;
 }
 
+export class UpdateSprintDto {
+  @IsOptional()
+  @IsString()
+  @Length(2, 120)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 2000)
+  goal?: string;
+
+  @IsOptional()
+  @IsDateString()
+  startsAt?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endsAt?: string;
+}
+
 export class AddSprintItemDto {
   @IsUUID()
   backlogItemId!: string;

@@ -43,6 +43,7 @@ import {
   UpdateBacklogDto,
   UpdateProjectDto,
   UpdateRetrospectiveActionDto,
+  UpdateSprintDto,
   UpdateTaskDto,
   UpdateWorkflowColumnDto
 } from "./core.dto";
@@ -194,6 +195,15 @@ export class CoreController {
     @Body() dto: CreateSprintDto
   ) {
     return this.core.createSprint(user.sub, projectId, dto);
+  }
+
+  @Patch("sprints/:sprintId")
+  updateSprint(
+    @CurrentUser() user: AuthUser,
+    @Param("sprintId") sprintId: string,
+    @Body() dto: UpdateSprintDto
+  ) {
+    return this.core.updateSprint(user.sub, sprintId, dto);
   }
 
   @Post("sprints/:sprintId/events")
