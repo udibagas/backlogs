@@ -1,6 +1,25 @@
 <script setup lang="ts">
-import { ArrowLeft } from "@element-plus/icons-vue";
+import {
+  ArrowLeft,
+  Check,
+  Close,
+  Delete,
+  Edit,
+  Plus,
+  VideoPlay
+} from "@element-plus/icons-vue";
+import { ElMessageBox } from "element-plus";
 
+interface BacklogItem {
+  id: string;
+  identifier: string;
+  title: string;
+  estimate: number | null;
+  status: string;
+}
+interface BacklogResponse {
+  data: BacklogItem[];
+}
 interface Sprint {
   id: string;
   name: string;
@@ -33,8 +52,30 @@ const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const sprintId = computed(() => String(route.params.sprintId));
 const sprint = ref<Sprint | null>(null);
+const backlog = ref<BacklogItem[]>([]);
+const selectedBacklogItem = ref("");
+const eventType = ref("PLANNING");
+const eventNotes = ref("");
+const eventFeedback = ref("");
 const errorMessage = ref("");
 const loading = ref(true);
+const sprintDialogOpen = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
+const starting = ref(false);
+const savingItem = ref(false);
+const savingEvent = ref(false);
+const form = reactive({ name: "", goal: "", startsAt: "", endsAt: "" });
+const canUpdateBacklog = computed(() =>
+  ["PLANNING", "ACTIVE"].includes(sprint.value?.status ?? "")
+);
+const availableBacklogItems = computed(() =>
+  backlog.value.filter(
+    (item) =>
+      item.status !== "DONE" &&
+      !sprint.value?.items.some((entry) => entry.backlogItem.id === item.id)
+  )
+);
 
 const completedItems = computed(
   () => sprint.value?.items.filter((item) => item.backlogItem.status === "DONE").length ?? 0
@@ -68,17 +109,172 @@ function statusTagType(status: string) {
   return "primary";
 }
 
+function toDateInputValue(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function openEditSprint() {
+  if (!sprint.value) return;
+  errorMessage.value = "";
+  Object.assign(form, {
+    name: sprint.value.name,
+    goal: sprint.value.goal,
+    startsAt: toDateInputValue(sprint.value.startsAt),
+    endsAt: toDateInputValue(sprint.value.endsAt)
+  });
+  sprintDialogOpen.value = true;
+}
+
 async function load() {
   loading.value = true;
   errorMessage.value = "";
   try {
-    const sprints = await request<Sprint[]>(`/projects/${projectId.value}/sprints`);
+    const [sprints, backlogData] = await Promise.all([
+      request<Sprint[]>(`/projects/${projectId.value}/sprints`),
+      request<BacklogResponse>(`/projects/${projectId.value}/backlog`, {
+        query: { limit: 100 }
+      })
+    ]);
     sprint.value = sprints.find((entry) => entry.id === sprintId.value) ?? null;
+    backlog.value = backlogData.data;
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
     sprint.value = null;
+    backlog.value = [];
   } finally {
     loading.value = false;
+  }
+}
+
+async function addBacklogItem() {
+  if (!selectedBacklogItem.value || !sprint.value || !canUpdateBacklog.value) return;
+  errorMessage.value = "";
+  savingItem.value = true;
+  try {
+    await request(`/sprints/${sprintId.value}/items`, {
+      method: "POST",
+      body: { backlogItemId: selectedBacklogItem.value }
+    });
+    selectedBacklogItem.value = "";
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    savingItem.value = false;
+  }
+}
+
+async function removeBacklogItem(itemId: string) {
+  errorMessage.value = "";
+  try {
+    await request(`/sprints/${sprintId.value}/items/${itemId}`, { method: "DELETE" });
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  }
+}
+
+async function recordEvent() {
+  if (!sprint.value) return;
+  errorMessage.value = "";
+  savingEvent.value = true;
+  try {
+    await request(`/sprints/${sprintId.value}/events`, {
+      method: "POST",
+      body: {
+        type: eventType.value,
+        notes: eventNotes.value,
+        feedback: eventFeedback.value
+      }
+    });
+    eventNotes.value = "";
+    eventFeedback.value = "";
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    savingEvent.value = false;
+  }
+}
+
+async function saveSprint() {
+  errorMessage.value = "";
+  if (
+    !form.name.trim() ||
+    !form.goal.trim() ||
+    !form.startsAt ||
+    !form.endsAt ||
+    form.endsAt <= form.startsAt
+  ) {
+    errorMessage.value = "Add a name, Sprint Goal, and valid start/end dates.";
+    return;
+  }
+  saving.value = true;
+  try {
+    await request(`/sprints/${sprintId.value}`, {
+      method: "PATCH",
+      body: {
+        ...form,
+        startsAt: new Date(`${form.startsAt}T00:00:00`).toISOString(),
+        endsAt: new Date(`${form.endsAt}T00:00:00`).toISOString()
+      }
+    });
+    sprintDialogOpen.value = false;
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    saving.value = false;
+  }
+}
+
+async function deleteSprint() {
+  if (!sprint.value) return;
+  errorMessage.value = "";
+  try {
+    await ElMessageBox.confirm(
+      `"${sprint.value.name}" will be permanently deleted. Its backlog items return to the backlog.`,
+      "Delete Sprint",
+      { type: "warning", confirmButtonText: "Delete", cancelButtonText: "Cancel" }
+    );
+  } catch {
+    return;
+  }
+  deleting.value = true;
+  try {
+    await request(`/sprints/${sprintId.value}`, { method: "DELETE" });
+    await navigateTo(`/projects/${projectId.value}/sprints`);
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    deleting.value = false;
+  }
+}
+
+async function startSprint() {
+  if (!sprint.value) return;
+  errorMessage.value = "";
+  try {
+    await ElMessageBox.confirm(
+      `Start "${sprint.value.name}" now? The team will begin working toward its Sprint Goal.`,
+      "Start Sprint",
+      { type: "info", confirmButtonText: "Start Sprint", cancelButtonText: "Cancel" }
+    );
+  } catch {
+    return;
+  }
+  starting.value = true;
+  try {
+    await request(`/sprints/${sprintId.value}/start`, { method: "POST" });
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    starting.value = false;
   }
 }
 
@@ -110,10 +306,30 @@ watch([projectId, sprintId], load);
         >
           All Sprints
         </el-button>
+        <div v-if="sprint?.status === 'PLANNING'" class="flex gap-2">
+          <el-button
+            type="primary"
+            :icon="VideoPlay"
+            :loading="starting"
+            @click="startSprint"
+          >
+            Start Sprint
+          </el-button>
+          <el-button :icon="Edit" @click="openEditSprint">Edit</el-button>
+          <el-button
+            type="danger"
+            plain
+            :icon="Delete"
+            :loading="deleting"
+            @click="deleteSprint"
+          >
+            Delete
+          </el-button>
+        </div>
       </header>
 
       <el-alert
-        v-if="errorMessage"
+        v-if="errorMessage && !sprintDialogOpen"
         :title="errorMessage"
         type="error"
         show-icon
@@ -122,6 +338,66 @@ watch([projectId, sprintId], load);
       <el-empty v-if="!sprint && !errorMessage" description="This Sprint could not be found." />
 
       <template v-if="sprint">
+        <el-dialog v-model="sprintDialogOpen" title="Edit Sprint" width="600px" append-to-body>
+          <el-alert
+            v-if="errorMessage"
+            :title="errorMessage"
+            type="error"
+            show-icon
+            class="mb-4"
+          />
+          <el-form
+            id="edit-sprint-form"
+            class="form-stack"
+            label-position="top"
+            @submit.prevent="saveSprint"
+          >
+            <el-form-item label="Sprint name">
+              <el-input v-model="form.name" maxlength="120" placeholder="Sprint 1" />
+            </el-form-item>
+            <el-form-item label="Sprint Goal">
+              <el-input
+                v-model="form.goal"
+                maxlength="2000"
+                placeholder="What outcome should this Sprint achieve?"
+              />
+            </el-form-item>
+            <el-row :gutter="16">
+              <el-col :sm="12" :xs="24">
+                <el-form-item label="Start date">
+                  <el-date-picker
+                    v-model="form.startsAt"
+                    type="date"
+                    value-format="YYYY-MM-DD"
+                    class="w-full!"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :sm="12" :xs="24">
+                <el-form-item label="End date">
+                  <el-date-picker
+                    v-model="form.endsAt"
+                    type="date"
+                    value-format="YYYY-MM-DD"
+                    class="w-full!"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <template #footer>
+            <el-button :icon="Close" @click="sprintDialogOpen = false">Cancel</el-button>
+            <el-button
+              type="primary"
+              :icon="Check"
+              native-type="submit"
+              form="edit-sprint-form"
+              :loading="saving"
+            >
+              Save changes
+            </el-button>
+          </template>
+        </el-dialog>
         <el-row :gutter="16" class="mb-5">
           <el-col :sm="8" :xs="24" class="mb-4">
             <el-card shadow="never">
@@ -199,6 +475,17 @@ watch([projectId, sprintId], load);
                   <span class="muted text-xs">
                     {{ item.backlogItem.estimate ?? "—" }} pts
                   </span>
+                  <el-button
+                    v-if="canUpdateBacklog"
+                    link
+                    type="danger"
+                    size="small"
+                    :icon="Close"
+                    :aria-label="`Remove ${item.backlogItem.title} from Sprint`"
+                    @click="removeBacklogItem(item.backlogItem.id)"
+                  >
+                    Remove
+                  </el-button>
                 </li>
               </ul>
               <el-empty
@@ -206,6 +493,31 @@ watch([projectId, sprintId], load);
                 description="No backlog items have been added to this Sprint."
                 :image-size="80"
               />
+              <div v-if="canUpdateBacklog" class="mt-4 flex flex-col gap-2 sm:flex-row">
+                <el-select
+                  v-model="selectedBacklogItem"
+                  class="flex-1"
+                  placeholder="Select an available backlog item"
+                  aria-label="Add backlog item to Sprint"
+                  filterable
+                >
+                  <el-option
+                    v-for="item in availableBacklogItems"
+                    :key="item.id"
+                    :label="`${item.identifier} · ${item.title}`"
+                    :value="item.id"
+                  />
+                </el-select>
+                <el-button
+                  type="primary"
+                  :icon="Plus"
+                  :disabled="!selectedBacklogItem"
+                  :loading="savingItem"
+                  @click="addBacklogItem"
+                >
+                  Add item
+                </el-button>
+              </div>
             </el-card>
 
             <el-card shadow="never">
@@ -215,6 +527,46 @@ watch([projectId, sprintId], load);
                 <span class="muted text-xs">{{ sprint.events.length }} events</span>
                 </div>
               </template>
+              <el-form
+                class="form-stack mb-5"
+                label-position="top"
+                @submit.prevent="recordEvent"
+              >
+                <el-form-item label="Event">
+                  <el-select v-model="eventType">
+                    <el-option label="Sprint Planning" value="PLANNING" />
+                    <el-option label="Daily Scrum" value="DAILY_SCRUM" />
+                    <el-option label="Sprint Review" value="REVIEW" />
+                    <el-option label="Retrospective" value="RETROSPECTIVE" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="Notes">
+                  <el-input
+                    v-model="eventNotes"
+                    type="textarea"
+                    :rows="2"
+                    maxlength="10000"
+                    placeholder="Planning decisions, observations, or outcomes"
+                  />
+                </el-form-item>
+                <el-form-item v-if="eventType === 'REVIEW'" label="Stakeholder feedback">
+                  <el-input
+                    v-model="eventFeedback"
+                    type="textarea"
+                    :rows="2"
+                    maxlength="10000"
+                    placeholder="Capture feedback without treating it as an approved requirement"
+                  />
+                </el-form-item>
+                <el-button
+                  type="primary"
+                  :icon="Plus"
+                  native-type="submit"
+                  :loading="savingEvent"
+                >
+                  Record event
+                </el-button>
+              </el-form>
               <ul v-if="sprint.events.length" class="m-0 list-none space-y-3 p-0">
                 <li
                   v-for="event in sprint.events"
