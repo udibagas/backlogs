@@ -95,6 +95,11 @@ export class CoreController {
     return this.core.updateProject(user.sub, projectId, dto);
   }
 
+  @Delete("projects/:projectId")
+  archiveProject(@CurrentUser() user: AuthUser, @Param("projectId") projectId: string) {
+    return this.core.archiveProject(user.sub, projectId);
+  }
+
   @Patch("projects/:projectId/workflow/:status")
   updateWorkflowColumn(
     @CurrentUser() user: AuthUser,

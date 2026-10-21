@@ -99,7 +99,7 @@ export class CoreService {
   }
 
   async projects(userId: string) {
-    return this.prisma.project.findMany({
+    const projects = await this.prisma.project.findMany({
       where: {
         status: ProjectStatus.ACTIVE,
         OR: [
@@ -115,9 +115,28 @@ export class CoreService {
       },
       orderBy: { updatedAt: "desc" },
       include: {
-        organization: { select: { id: true, name: true } },
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            memberships: { where: { userId }, select: { role: true } }
+          }
+        },
+        memberships: { where: { userId }, select: { role: true } },
         _count: { select: { backlogItems: true, sprints: true, tasks: true } }
       }
+    });
+    return projects.map(({ memberships, organization, ...project }) => {
+      const organizationRole = organization.memberships[0]?.role;
+      const canManage =
+        managerRoles.includes(memberships[0]?.role ?? ProjectRole.VIEWER) ||
+        organizationRole === OrganizationRole.OWNER ||
+        organizationRole === OrganizationRole.ADMIN;
+      return {
+        ...project,
+        organization: { id: organization.id, name: organization.name },
+        canManage
+      };
     });
   }
 
@@ -181,24 +200,56 @@ export class CoreService {
     const { role } = await this.projectAccess(userId, projectId);
     this.requireManager(role);
     const before = await this.prisma.project.findUniqueOrThrow({ where: { id: projectId } });
-    const after = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.project.update({
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const updated = await tx.project.update({
+          where: { id: projectId },
+          data: {
+            ...dto,
+            name: dto.name?.trim(),
+            key: dto.key?.trim().toUpperCase(),
+            description: dto.description?.trim()
+          }
+        });
+        await tx.activity.create({
+          data: {
+            projectId,
+            actorId: userId,
+            action: "project.updated",
+            entityType: "Project",
+            entityId: projectId,
+            details: { changed: Object.keys(dto), previousName: before.name }
+          }
+        });
+        return updated;
+      });
+    } catch (error) {
+      if (this.isUniqueConstraintError(error))
+        throw new ConflictException("Project key already exists in this organization");
+      throw error;
+    }
+  }
+
+  async archiveProject(userId: string, projectId: string) {
+    const { role } = await this.projectAccess(userId, projectId);
+    this.requireManager(role);
+    return this.prisma.$transaction(async (tx) => {
+      const project = await tx.project.update({
         where: { id: projectId },
-        data: { ...dto, name: dto.name?.trim(), description: dto.description?.trim() }
+        data: { status: ProjectStatus.ARCHIVED }
       });
       await tx.activity.create({
         data: {
           projectId,
           actorId: userId,
-          action: "project.updated",
+          action: "project.archived",
           entityType: "Project",
           entityId: projectId,
-          details: { changed: Object.keys(dto), previousName: before.name }
+          details: { name: project.name }
         }
       });
-      return updated;
+      return project;
     });
-    return after;
   }
 
   async updateWorkflowColumn(

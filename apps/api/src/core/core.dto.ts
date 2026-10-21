@@ -62,8 +62,18 @@ export class UpdateProjectDto {
 
   @IsOptional()
   @IsString()
+  @Length(2, 8)
+  @Matches(/^[a-zA-Z0-9]+$/)
+  key?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 2000)
   description?: string;
+
+  @IsOptional()
+  @IsEnum(Methodology)
+  methodology?: Methodology;
 
   @IsOptional()
   @IsEnum(ProjectStatus)
