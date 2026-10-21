@@ -302,6 +302,11 @@ export class CoreController {
     return this.core.updateTask(user.sub, taskId, dto);
   }
 
+  @Delete("tasks/:taskId")
+  deleteTask(@CurrentUser() user: AuthUser, @Param("taskId") taskId: string) {
+    return this.core.deleteTask(user.sub, taskId);
+  }
+
   @Get("projects/:projectId/reports")
   reports(@CurrentUser() user: AuthUser, @Param("projectId") projectId: string) {
     return this.core.reports(user.sub, projectId);

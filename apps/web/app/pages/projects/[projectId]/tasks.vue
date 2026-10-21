@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ElMessageBox } from "element-plus";
+
 interface Task {
   id: string;
   title: string;
@@ -14,12 +16,37 @@ const route = useRoute();
 const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const tasks = ref<Task[]>([]);
+const displayMode = ref<"list" | "board">("list");
 const form = reactive({ title: "", description: "", priority: "MEDIUM", estimate: "" });
 const taskDialogOpen = ref(false);
 const editingTaskId = ref<string | null>(null);
 const errorMessage = ref("");
 const loading = ref(true);
 const saving = ref(false);
+const deletingTaskId = ref<string | null>(null);
+const taskStatuses = ["TODO", "IN_PROGRESS", "IN_REVIEW", "TESTING", "BLOCKED", "DONE"];
+const taskStatusColors: Record<string, string> = {
+  TODO: "#909399",
+  IN_PROGRESS: "#e6a23c",
+  IN_REVIEW: "#9254de",
+  TESTING: "#13c2c2",
+  BLOCKED: "#f56c6c",
+  DONE: "#67c23a"
+};
+const taskColumns = computed(() =>
+  taskStatuses.map((status) => ({
+    status,
+    tasks: tasks.value.filter((task) => task.status === status)
+  }))
+);
+
+function taskColumnStyle(status: string) {
+  const accent = taskStatusColors[status];
+  return {
+    background: `color-mix(in srgb, ${accent} 8%, var(--el-bg-color))`,
+    border: `1px solid color-mix(in srgb, ${accent} 35%, var(--el-border-color-lighter))`
+  };
+}
 
 function openCreateTask() {
   errorMessage.value = "";
@@ -63,9 +90,7 @@ async function saveTask() {
   saving.value = true;
   try {
     await request(
-      editingTaskId.value
-        ? `/tasks/${editingTaskId.value}`
-        : `/projects/${projectId.value}/tasks`,
+      editingTaskId.value ? `/tasks/${editingTaskId.value}` : `/projects/${projectId.value}/tasks`,
       {
         method: editingTaskId.value ? "PATCH" : "POST",
         body: {
@@ -89,12 +114,44 @@ async function saveTask() {
   }
 }
 async function updateStatus(task: Task, status: string) {
+  errorMessage.value = "";
   try {
     await request(`/tasks/${task.id}`, { method: "PATCH", body: { status } });
     await load();
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   }
+}
+async function deleteTask(task: Task) {
+  errorMessage.value = "";
+  try {
+    await ElMessageBox.confirm(
+      `"${task.title}" and its comments and dependencies will be permanently deleted.`,
+      "Delete task",
+      { type: "warning", confirmButtonText: "Delete", cancelButtonText: "Cancel" }
+    );
+  } catch {
+    return;
+  }
+  deletingTaskId.value = task.id;
+  try {
+    await request(`/tasks/${task.id}`, { method: "DELETE" });
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  } finally {
+    deletingTaskId.value = null;
+  }
+}
+function dragStart(event: DragEvent, taskId: string) {
+  event.dataTransfer?.setData("text/plain", taskId);
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+}
+function dropTask(event: DragEvent, status: string) {
+  event.preventDefault();
+  const taskId = event.dataTransfer?.getData("text/plain");
+  const task = tasks.value.find((candidate) => candidate.id === taskId);
+  if (task && task.status !== status) void updateStatus(task, status);
 }
 onMounted(load);
 watch(projectId, load);
@@ -126,12 +183,7 @@ watch(projectId, load);
       append-to-body
     >
       <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
-      <el-form
-        id="task-form"
-        class="form-stack"
-        label-position="top"
-        @submit.prevent="saveTask"
-      >
+      <el-form id="task-form" class="form-stack" label-position="top" @submit.prevent="saveTask">
         <el-row :gutter="12">
           <el-col :md="12" :xs="24">
             <el-form-item label="Task title">
@@ -171,15 +223,36 @@ watch(projectId, load);
     </el-dialog>
     <el-card shadow="never">
       <div class="mb-4">
-        <h2 class="section-title">
-          Project tasks
-          <el-badge :value="tasks.length" type="info" :show-zero="true" class="ml-2" />
-        </h2>
-        <p class="muted mt-1 text-sm">
-          Task completion does not automatically complete a User Story.
-        </p>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="section-title">
+              Project tasks
+              <el-badge :value="tasks.length" type="info" :show-zero="true" class="ml-2" />
+            </h2>
+            <p class="muted mt-1 text-sm">
+              Task completion does not automatically complete a User Story.
+            </p>
+          </div>
+          <el-button-group aria-label="Task display mode">
+            <el-button
+              :type="displayMode === 'list' ? 'primary' : 'default'"
+              :aria-pressed="displayMode === 'list'"
+              @click="displayMode = 'list'"
+            >
+              List
+            </el-button>
+            <el-button
+              :type="displayMode === 'board' ? 'primary' : 'default'"
+              :aria-pressed="displayMode === 'board'"
+              @click="displayMode = 'board'"
+            >
+              Board
+            </el-button>
+          </el-button-group>
+        </div>
       </div>
       <el-table
+        v-if="displayMode === 'list'"
         v-loading="loading"
         :data="tasks"
         empty-text="No tasks yet. Create the first implementation task."
@@ -218,12 +291,79 @@ watch(projectId, load);
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="100" fixed="right">
+        <el-table-column label="Actions" width="150" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openEditTask(row as Task)">Edit</el-button>
+            <el-button
+              link
+              type="danger"
+              :loading="deletingTaskId === row.id"
+              @click="deleteTask(row as Task)"
+            >
+              Delete
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
+      <div v-else v-loading="loading" class="flex gap-4 overflow-x-auto pb-4">
+        <section
+          v-for="column in taskColumns"
+          :key="column.status"
+          class="min-w-64 rounded-lg border p-3"
+          :style="taskColumnStyle(column.status)"
+          @dragover.prevent
+          @drop="dropTask($event, column.status)"
+        >
+          <header class="mb-3 flex items-center justify-between gap-2 px-1">
+            <h3 class="text-sm font-semibold">{{ column.status.replaceAll("_", " ") }}</h3>
+            <el-badge :value="column.tasks.length" type="info" :show-zero="true" class="mr-2" />
+          </header>
+          <div class="space-y-2">
+            <el-card
+              v-for="task in column.tasks"
+              :key="task.id"
+              shadow="hover"
+              :body-style="{ padding: '12px' }"
+              draggable="true"
+              @dragstart="dragStart($event, task.id)"
+            >
+              <p class="text-sm font-medium">{{ task.title }}</p>
+              <p v-if="task.description" class="muted mt-1 line-clamp-2 text-xs">
+                {{ task.description }}
+              </p>
+              <p class="muted mt-2 truncate text-xs">
+                Parent: {{ task.backlogItem?.title ?? "—" }}
+              </p>
+              <div class="muted mt-2 flex items-center justify-between text-xs">
+                <span>{{ task.priority.toLowerCase() }}</span>
+                <span>{{ task.estimate ?? "—" }} pts</span>
+              </div>
+              <div class="mt-3 flex items-center justify-between gap-2">
+                <el-select
+                  :model-value="task.status"
+                  size="small"
+                  :aria-label="`Move ${task.title} to another status`"
+                  @change="updateStatus(task, $event as string)"
+                >
+                  <el-option
+                    v-for="status in taskStatuses"
+                    :key="status"
+                    :label="status.replaceAll('_', ' ').toLowerCase()"
+                    :value="status"
+                  />
+                </el-select>
+                <el-button link type="primary" @click="openEditTask(task)">Edit</el-button>
+              </div>
+            </el-card>
+            <p v-if="!column.tasks.length" class="muted py-8 text-center text-xs">
+              Drop tasks here
+            </p>
+          </div>
+        </section>
+        <p v-if="!loading && !tasks.length" class="muted col-span-full py-8 text-center text-sm">
+          No tasks yet. Create the first implementation task.
+        </p>
+      </div>
     </el-card>
   </div>
 </template>

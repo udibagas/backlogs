@@ -1110,6 +1110,27 @@ export class CoreService {
     });
   }
 
+  async deleteTask(userId: string, taskId: string) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new NotFoundException("Task not found");
+    const { role } = await this.projectAccess(userId, task.projectId);
+    this.requireEditor(role);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.task.delete({ where: { id: taskId } });
+      await tx.activity.create({
+        data: {
+          projectId: task.projectId,
+          actorId: userId,
+          action: "task.deleted",
+          entityType: "Task",
+          entityId: task.id,
+          details: { title: task.title }
+        }
+      });
+    });
+    return { deleted: true };
+  }
+
   async reports(userId: string, projectId: string) {
     await this.projectAccess(userId, projectId);
     const [statusCounts, priorityCounts, typeCounts, activeSprint, recentActivity, totalTasks] =
