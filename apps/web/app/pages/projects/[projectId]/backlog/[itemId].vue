@@ -356,7 +356,9 @@ watch([projectId, itemId], load);
       <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div class="space-y-5">
           <el-card shadow="never">
-            <h2 class="section-title">Description</h2>
+            <template #header>
+              <h2 class="section-title">Description</h2>
+            </template>
             <p v-if="item.description" class="mt-3 whitespace-pre-wrap text-sm leading-6">
               {{ item.description }}
             </p>
@@ -378,10 +380,13 @@ watch([projectId, itemId], load);
           </el-card>
 
           <el-card shadow="never">
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="section-title">Acceptance criteria</h2>
-              <el-tag size="small" type="info">{{ item.criteria.length }}</el-tag>
-            </div>
+            <template #header>
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="section-title">Acceptance criteria</h2>
+                <el-tag size="small" type="info">{{ item.criteria.length }}</el-tag>
+              </div>
+            </template>
+
             <ul v-if="item.criteria.length" class="m-0 mt-4 list-none space-y-3 p-0">
               <li
                 v-for="criterion in item.criteria"
@@ -402,10 +407,14 @@ watch([projectId, itemId], load);
           </el-card>
 
           <el-card shadow="never">
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="section-title">Tasks</h2>
-              <el-button type="primary" :icon="Plus" @click="openTaskDialog()">Add task</el-button>
-            </div>
+            <template #header>
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="section-title">Tasks</h2>
+                <el-button type="primary" :icon="Plus" @click="openTaskDialog()">
+                  Add task
+                </el-button>
+              </div>
+            </template>
             <ul v-if="item.tasks.length" class="m-0 mt-2 list-none divide-y p-0">
               <li
                 v-for="task in item.tasks"
@@ -433,7 +442,9 @@ watch([projectId, itemId], load);
           </el-card>
 
           <el-card shadow="never">
-            <h2 class="section-title">Discussion</h2>
+            <template #header>
+              <h2 class="section-title">Discussion</h2>
+            </template>
             <ul
               v-if="comments.length"
               class="m-0 mt-4 list-none space-y-4 p-0"
@@ -521,7 +532,9 @@ watch([projectId, itemId], load);
 
         <aside class="space-y-5">
           <el-card shadow="never">
-            <h2 class="section-title mb-4">Details</h2>
+            <template #header>
+              <h2 class="section-title">Details</h2>
+            </template>
             <div class="space-y-4">
               <div>
                 <p class="muted mb-1 text-xs">Status</p>
@@ -581,7 +594,9 @@ watch([projectId, itemId], load);
           </el-card>
 
           <el-card shadow="never">
-            <h2 class="section-title">Dependencies</h2>
+            <template #header>
+              <h2 class="section-title">Dependencies</h2>
+            </template>
             <ul
               v-if="item.dependencies.length"
               class="m-0 mt-3 list-none space-y-2 p-0"
@@ -649,7 +664,9 @@ watch([projectId, itemId], load);
           </el-card>
 
           <el-card v-if="item.parent || item.children.length" shadow="never">
-            <h2 class="section-title">Hierarchy</h2>
+            <template #header>
+              <h2 class="section-title">Hierarchy</h2>
+            </template>
             <p v-if="item.parent" class="muted mb-2 mt-3 text-xs">Parent item</p>
             <NuxtLink
               v-if="item.parent"

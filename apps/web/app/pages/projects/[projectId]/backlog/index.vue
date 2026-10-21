@@ -92,28 +92,30 @@ watch(projectId, load);
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-card shadow="never">
-      <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="section-title">
-            Backlog items
-            <el-badge :value="items.length" type="info" :show-zero="true" class="ml-2" />
-          </h2>
-          <p class="muted mt-1 text-sm">Search, refine, and prepare work for planning.</p>
+      <template #header>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="section-title">
+              Backlog items
+              <el-badge :value="items.length" type="info" :show-zero="true" class="ml-2" />
+            </h2>
+            <p class="muted mt-1 text-sm">Search, refine, and prepare work for planning.</p>
+          </div>
+          <el-input
+            v-model="search"
+            class="sm:w-72!"
+            placeholder="Search backlog"
+            aria-label="Search backlog"
+            clearable
+            @keyup.enter="load"
+            @clear="load"
+          >
+            <template #append>
+              <el-button :icon="Search" @click="load">Search</el-button>
+            </template>
+          </el-input>
         </div>
-        <el-input
-          v-model="search"
-          class="sm:w-72!"
-          placeholder="Search backlog"
-          aria-label="Search backlog"
-          clearable
-          @keyup.enter="load"
-          @clear="load"
-        >
-          <template #append>
-            <el-button :icon="Search" @click="load">Search</el-button>
-          </template>
-        </el-input>
-      </div>
+      </template>
       <el-table v-loading="loading" :data="items">
         <template #empty>
           <el-empty description="Nothing in the backlog yet">

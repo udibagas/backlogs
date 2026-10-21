@@ -309,7 +309,14 @@ watch(projectId, load);
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="section-title">{{ sprint.name }}</h2>
+              <h2 class="section-title">
+                <NuxtLink
+                  :to="`/projects/${projectId}/sprints/${sprint.id}`"
+                  class="text-inherit no-underline hover:text-(--el-color-primary)"
+                >
+                  {{ sprint.name }}
+                </NuxtLink>
+              </h2>
               <el-tag
                 size="small"
                 :type="
