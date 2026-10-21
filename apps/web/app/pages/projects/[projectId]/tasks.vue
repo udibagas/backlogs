@@ -15,9 +15,30 @@ const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const tasks = ref<Task[]>([]);
 const form = reactive({ title: "", description: "", priority: "MEDIUM", estimate: "" });
+const taskDialogOpen = ref(false);
+const editingTaskId = ref<string | null>(null);
 const errorMessage = ref("");
 const loading = ref(true);
 const saving = ref(false);
+
+function openCreateTask() {
+  errorMessage.value = "";
+  editingTaskId.value = null;
+  Object.assign(form, { title: "", description: "", priority: "MEDIUM", estimate: "" });
+  taskDialogOpen.value = true;
+}
+
+function openEditTask(task: Task) {
+  errorMessage.value = "";
+  editingTaskId.value = task.id;
+  Object.assign(form, {
+    title: task.title,
+    description: task.description,
+    priority: task.priority,
+    estimate: task.estimate == null ? "" : String(task.estimate)
+  });
+  taskDialogOpen.value = true;
+}
 
 async function load() {
   loading.value = true;
@@ -29,24 +50,37 @@ async function load() {
     loading.value = false;
   }
 }
-async function createTask() {
+async function saveTask() {
   errorMessage.value = "";
-  if (form.title.trim().length < 2 || (form.estimate && Number(form.estimate) < 0)) {
-    errorMessage.value = "Enter a task title and a non-negative estimate.";
+  const estimate = form.estimate ? Number(form.estimate) : null;
+  if (
+    form.title.trim().length < 2 ||
+    (estimate !== null && (!Number.isFinite(estimate) || estimate < 0 || estimate > 1000))
+  ) {
+    errorMessage.value = "Enter a task title and a non-negative estimate up to 1000.";
     return;
   }
   saving.value = true;
   try {
-    await request(`/projects/${projectId.value}/tasks`, {
-      method: "POST",
-      body: {
-        title: form.title.trim(),
-        description: form.description,
-        priority: form.priority,
-        estimate: form.estimate ? Number(form.estimate) : undefined
+    await request(
+      editingTaskId.value
+        ? `/tasks/${editingTaskId.value}`
+        : `/projects/${projectId.value}/tasks`,
+      {
+        method: editingTaskId.value ? "PATCH" : "POST",
+        body: {
+          title: form.title.trim(),
+          description: form.description,
+          priority: form.priority,
+          estimate: estimate ?? (editingTaskId.value ? null : undefined)
+        }
       }
-    });
-    Object.assign(form, { title: "", description: "", priority: "MEDIUM", estimate: "" });
+    );
+    if (!editingTaskId.value) {
+      Object.assign(form, { title: "", description: "", priority: "MEDIUM", estimate: "" });
+    }
+    editingTaskId.value = null;
+    taskDialogOpen.value = false;
     await load();
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
@@ -76,11 +110,28 @@ watch(projectId, load);
           Implementation work connected to the product outcomes it supports.
         </p>
       </div>
+      <el-button type="primary" @click="openCreateTask">+ New task</el-button>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
-    <el-card shadow="never" class="mb-6">
-      <h2 class="section-title">Create a task</h2>
-      <el-form class="form-stack mt-4" label-position="top" @submit.prevent="createTask">
+    <el-alert
+      v-if="errorMessage && !taskDialogOpen"
+      :title="errorMessage"
+      type="error"
+      show-icon
+      class="mb-5"
+    />
+    <el-dialog
+      v-model="taskDialogOpen"
+      :title="editingTaskId ? 'Edit task' : 'Create a task'"
+      width="600px"
+      append-to-body
+    >
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-form
+        id="task-form"
+        class="form-stack"
+        label-position="top"
+        @submit.prevent="saveTask"
+      >
         <el-row :gutter="12">
           <el-col :md="12" :xs="24">
             <el-form-item label="Task title">
@@ -110,9 +161,14 @@ watch(projectId, load);
             </el-form-item>
           </el-col>
         </el-row>
-        <el-button type="primary" native-type="submit" :loading="saving">Add task</el-button>
       </el-form>
-    </el-card>
+      <template #footer>
+        <el-button @click="taskDialogOpen = false">Cancel</el-button>
+        <el-button type="primary" native-type="submit" form="task-form" :loading="saving">
+          {{ editingTaskId ? "Save changes" : "Add task" }}
+        </el-button>
+      </template>
+    </el-dialog>
     <el-card shadow="never">
       <div class="mb-4">
         <h2 class="section-title">
@@ -126,7 +182,7 @@ watch(projectId, load);
       <el-table
         v-loading="loading"
         :data="tasks"
-        empty-text="No tasks yet. Create the first implementation task above."
+        empty-text="No tasks yet. Create the first implementation task."
       >
         <el-table-column label="Task" min-width="240">
           <template #default="{ row }">
@@ -160,6 +216,11 @@ watch(projectId, load);
                 :value="status"
               />
             </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column label="Actions" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="openEditTask(row as Task)">Edit</el-button>
           </template>
         </el-table-column>
       </el-table>
