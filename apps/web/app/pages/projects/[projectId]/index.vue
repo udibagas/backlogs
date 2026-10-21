@@ -168,11 +168,11 @@ watch(projectId, load);
       <el-card shadow="never" class="mb-7">
         <template #header>
           <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 class="section-title">Project team</h2>
-            <p class="muted mt-1 text-sm">Collaborate with people on this project.</p>
-          </div>
-          <el-tag type="info">{{ members.length }} members</el-tag>
+            <div>
+              <h2 class="section-title">Project team</h2>
+              <p class="muted mt-1 text-sm">Collaborate with people on this project.</p>
+            </div>
+            <el-tag type="info">{{ members.length }} members</el-tag>
           </div>
         </template>
         <el-alert v-if="memberError" :title="memberError" type="error" show-icon class="mb-4" />
@@ -189,7 +189,7 @@ watch(projectId, load);
             aria-label="Collaborator email"
             class="flex-1"
           />
-          <el-select v-model="memberRole" aria-label="Project role" class="sm:!w-48">
+          <el-select v-model="memberRole" aria-label="Project role" class="sm:w-48!">
             <el-option label="Manager" value="MANAGER" />
             <el-option label="Product owner" value="PRODUCT_OWNER" />
             <el-option label="Scrum master" value="SCRUM_MASTER" />
@@ -234,16 +234,16 @@ watch(projectId, load);
         <el-card shadow="never">
           <template #header>
             <div class="flex items-start justify-between">
-            <div>
-              <h2 class="section-title">Work by status</h2>
-              <p class="muted mt-1 text-sm">Live counts from the Product Backlog.</p>
-            </div>
-            <el-link
-              type="primary"
-              underline="never"
-              @click="navigateTo(`/projects/${project.id}/board`)"
-              >View board →</el-link
-            >
+              <div>
+                <h2 class="section-title">Work by status</h2>
+                <p class="muted mt-1 text-sm">Live counts from the Product Backlog.</p>
+              </div>
+              <el-link
+                type="primary"
+                underline="never"
+                @click="navigateTo(`/projects/${project.id}/board`)"
+                >View board →</el-link
+              >
             </div>
           </template>
           <div v-if="report?.backlogByStatus.length" class="space-y-4">
@@ -270,7 +270,7 @@ watch(projectId, load);
           <template #header>
             <h2 class="section-title">Recent activity</h2>
           </template>
-          <el-timeline v-if="report?.recentActivity.length" class="mt-4 !pl-1">
+          <el-timeline v-if="report?.recentActivity.length" class="mt-4 pl-1!">
             <el-timeline-item
               v-for="activity in report.recentActivity"
               :key="activity.id"
