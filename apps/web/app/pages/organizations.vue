@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Folder, Plus } from "@element-plus/icons-vue";
+
 interface Organization {
   id: string;
   name: string;
@@ -63,7 +65,7 @@ onMounted(load);
           placeholder="e.g. Northstar Studio"
           maxlength="100"
         />
-        <el-button type="primary" native-type="submit" :loading="pending">
+        <el-button type="primary" :icon="Plus" native-type="submit" :loading="pending">
           Create organization
         </el-button>
       </form>
@@ -93,7 +95,7 @@ onMounted(load);
               {{ organization.memberships[0]?.role.toLowerCase() }}
             </p>
           </div>
-          <el-button @click="navigateTo('/projects')">View projects</el-button>
+          <el-button :icon="Folder" @click="navigateTo('/projects')">View projects</el-button>
         </li>
       </ul>
     </el-card>

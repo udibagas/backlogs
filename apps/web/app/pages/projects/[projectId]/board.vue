@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { List, Plus } from "@element-plus/icons-vue";
+
 interface Card {
   id: string;
   identifier: string;
@@ -108,8 +110,10 @@ watch(projectId, load);
         </p>
       </div>
       <div class="flex flex-wrap gap-2">
-        <el-button @click="navigateTo(`/projects/${projectId}/backlog`)">Product backlog</el-button>
-        <el-button type="primary" @click="createDialogOpen = true">+ New item</el-button>
+        <el-button :icon="List" @click="navigateTo(`/projects/${projectId}/backlog`)">
+          Product backlog
+        </el-button>
+        <el-button type="primary" :icon="Plus" @click="createDialogOpen = true">New item</el-button>
       </div>
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />

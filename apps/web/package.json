@@ -12,6 +12,7 @@
     "typecheck": "nuxt prepare && vue-tsc --noEmit -p .nuxt/tsconfig.json"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "@element-plus/nuxt": "^1.1.5",
     "element-plus": "^2.14.7",
     "zod": "4.6.7"

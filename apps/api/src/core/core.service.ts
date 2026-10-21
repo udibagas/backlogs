@@ -808,6 +808,32 @@ export class CoreService {
     });
   }
 
+  async deleteSprint(userId: string, sprintId: string) {
+    const sprint = await this.prisma.sprint.findUnique({ where: { id: sprintId } });
+    if (!sprint) throw new NotFoundException("Sprint not found");
+    const { role } = await this.projectAccess(userId, sprint.projectId);
+    this.requireManager(role);
+    await this.prisma.$transaction(async (tx) => {
+      const deleted = await tx.sprint.deleteMany({
+        where: { id: sprintId, status: SprintStatus.PLANNING }
+      });
+      if (!deleted.count) {
+        throw new BadRequestException("Only a planned Sprint can be deleted");
+      }
+      await tx.activity.create({
+        data: {
+          projectId: sprint.projectId,
+          actorId: userId,
+          action: "sprint.deleted",
+          entityType: "Sprint",
+          entityId: sprintId,
+          details: { name: sprint.name }
+        }
+      });
+    });
+    return { deleted: true };
+  }
+
   async addSprintItem(userId: string, sprintId: string, dto: AddSprintItemDto) {
     const sprint = await this.prisma.sprint.findUnique({ where: { id: sprintId } });
     if (!sprint) throw new NotFoundException("Sprint not found");

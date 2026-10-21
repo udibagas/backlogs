@@ -206,6 +206,11 @@ export class CoreController {
     return this.core.updateSprint(user.sub, sprintId, dto);
   }
 
+  @Delete("sprints/:sprintId")
+  deleteSprint(@CurrentUser() user: AuthUser, @Param("sprintId") sprintId: string) {
+    return this.core.deleteSprint(user.sub, sprintId);
+  }
+
   @Post("sprints/:sprintId/events")
   createSprintEvent(
     @CurrentUser() user: AuthUser,

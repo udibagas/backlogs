@@ -1,4 +1,16 @@
 <script setup lang="ts">
+import {
+  ArrowLeft,
+  Check,
+  Close,
+  Download,
+  Edit,
+  Paperclip,
+  Plus,
+  Refresh,
+  Select
+} from "@element-plus/icons-vue";
+
 interface BacklogItem {
   id: string;
   identifier: string;
@@ -327,10 +339,10 @@ watch([projectId, itemId], load);
           </p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <el-button @click="navigateTo(`/projects/${projectId}/backlog`)"
+          <el-button :icon="ArrowLeft" @click="navigateTo(`/projects/${projectId}/backlog`)"
             >Back to backlog</el-button
           >
-          <el-button type="primary" @click="editorOpen = true">Edit item</el-button>
+          <el-button type="primary" :icon="Edit" @click="editorOpen = true">Edit item</el-button>
         </div>
       </header>
       <el-alert
@@ -392,7 +404,7 @@ watch([projectId, itemId], load);
           <el-card shadow="never">
             <div class="flex items-center justify-between gap-3">
               <h2 class="section-title">Tasks</h2>
-              <el-button type="primary" @click="openTaskDialog()">Add task</el-button>
+              <el-button type="primary" :icon="Plus" @click="openTaskDialog()">Add task</el-button>
             </div>
             <ul v-if="item.tasks.length" class="m-0 mt-2 list-none divide-y p-0">
               <li
@@ -414,7 +426,7 @@ watch([projectId, itemId], load);
                     </span>
                   </div>
                 </div>
-                <el-button size="small" @click="openTaskDialog(task)">Edit</el-button>
+                <el-button size="small" :icon="Edit" @click="openTaskDialog(task)">Edit</el-button>
               </li>
             </ul>
             <p v-else class="muted mt-3 text-sm">No tasks are linked to this item yet.</p>
@@ -447,6 +459,7 @@ watch([projectId, itemId], load);
                     <el-button
                       link
                       type="primary"
+                      :icon="Download"
                       :loading="downloadingAttachmentId === attachment.id"
                       @click="downloadAttachment(comment, attachment)"
                     >
@@ -489,9 +502,12 @@ watch([projectId, itemId], load);
               @change="selectFiles"
             />
             <div class="mt-3 flex flex-wrap gap-2">
-              <el-button @click="attachmentInput?.click()">Attach files</el-button>
+              <el-button :icon="Paperclip" @click="attachmentInput?.click()"
+                >Attach files</el-button
+              >
               <el-button
                 type="primary"
+                :icon="Check"
                 :loading="commentSaving"
                 :disabled="!newComment.trim() && pendingFiles.length === 0"
                 @click="addComment"
@@ -586,6 +602,7 @@ watch([projectId, itemId], load);
                   link
                   type="danger"
                   size="small"
+                  :icon="Close"
                   :aria-label="`Remove dependency ${dependency.dependsOn.title}`"
                   @click="removeDependency(dependency.dependsOn.id)"
                   >Remove</el-button
@@ -609,6 +626,7 @@ watch([projectId, itemId], load);
                 />
               </el-select>
               <el-button
+                :icon="Plus"
                 :disabled="!dependencyTarget"
                 aria-label="Add selected dependency"
                 @click="addDependency"
@@ -659,11 +677,17 @@ watch([projectId, itemId], load);
     </template>
 
     <el-empty v-else-if="errorMessage" description="Unable to load backlog item">
-      <el-button type="primary" @click="load">Try again</el-button>
-      <el-button @click="navigateTo(`/projects/${projectId}/backlog`)">Back to backlog</el-button>
+      <el-button type="primary" :icon="Refresh" @click="load">Try again</el-button>
+      <el-button :icon="ArrowLeft" @click="navigateTo(`/projects/${projectId}/backlog`)">
+        Back to backlog
+      </el-button>
     </el-empty>
     <el-empty v-else description="Backlog item not found">
-      <el-button type="primary" @click="navigateTo(`/projects/${projectId}/backlog`)">
+      <el-button
+        type="primary"
+        :icon="ArrowLeft"
+        @click="navigateTo(`/projects/${projectId}/backlog`)"
+      >
         Back to backlog
       </el-button>
     </el-empty>
@@ -748,9 +772,10 @@ watch([projectId, itemId], load);
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="taskDialogOpen = false">Cancel</el-button>
+        <el-button :icon="Close" @click="taskDialogOpen = false">Cancel</el-button>
         <el-button
           type="primary"
+          :icon="Select"
           native-type="submit"
           form="backlog-item-task-form"
           :loading="taskSaving"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Plus, Search } from "@element-plus/icons-vue";
+
 interface BacklogItem {
   id: string;
   identifier: string;
@@ -86,7 +88,7 @@ watch(projectId, load);
         <h1 class="page-title">Product backlog</h1>
         <p class="muted mt-2 text-sm">A prioritized view of the outcomes your team may deliver.</p>
       </div>
-      <el-button type="primary" @click="openCreate">+ New item</el-button>
+      <el-button type="primary" :icon="Plus" @click="openCreate">New item</el-button>
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-card shadow="never">
@@ -108,7 +110,7 @@ watch(projectId, load);
           @clear="load"
         >
           <template #append>
-            <el-button @click="load">Search</el-button>
+            <el-button :icon="Search" @click="load">Search</el-button>
           </template>
         </el-input>
       </div>
@@ -116,7 +118,9 @@ watch(projectId, load);
         <template #empty>
           <el-empty description="Nothing in the backlog yet">
             <p class="muted mb-3 text-sm">Capture an Epic, User Story, Bug, Task, or Spike.</p>
-            <el-button type="primary" @click="openCreate">Create the first item</el-button>
+            <el-button type="primary" :icon="Plus" @click="openCreate">
+              Create the first item
+            </el-button>
           </el-empty>
         </template>
         <el-table-column label="Item" min-width="280">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Check, Close } from "@element-plus/icons-vue";
 import { z } from "zod";
 
 interface BacklogItem {
@@ -227,8 +228,8 @@ async function saveItem() {
       <slot name="details" :item="item" />
     </el-form>
     <template #footer>
-      <el-button @click="emit('update:modelValue', false)">Cancel</el-button>
-      <el-button type="primary" :loading="saving" @click="saveItem">
+      <el-button :icon="Close" @click="emit('update:modelValue', false)">Cancel</el-button>
+      <el-button type="primary" :icon="Check" :loading="saving" @click="saveItem">
         {{ item ? "Save changes" : "Add to backlog" }}
       </el-button>
     </template>

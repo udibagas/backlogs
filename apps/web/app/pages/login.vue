@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ layout: "default" });
+import { Right, UserFilled } from "@element-plus/icons-vue";
 import { z } from "zod";
 
 const { signIn } = useApi();
@@ -88,7 +89,13 @@ async function submit() {
             show-icon
             class="mb-4"
           />
-          <el-button type="primary" native-type="submit" class="w-full" :loading="pending">
+          <el-button
+            type="primary"
+            :icon="mode === 'login' ? Right : UserFilled"
+            native-type="submit"
+            class="w-full"
+            :loading="pending"
+          >
             {{ mode === "login" ? "Sign in" : "Create account" }}
           </el-button>
         </el-form>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { OfficeBuilding, Right } from "@element-plus/icons-vue";
+
 interface ProjectSummary {
   id: string;
   name: string;
@@ -32,7 +34,9 @@ onMounted(async () => {
         <h1 class="page-title">Good work starts with focus.</h1>
         <p class="muted mt-2 text-sm">A clear view of the projects moving your team forward.</p>
       </div>
-      <el-button type="primary" tag="router-link" to="/projects">View projects →</el-button>
+      <el-button type="primary" :icon="Right" tag="router-link" to="/projects">
+        View projects
+      </el-button>
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
     <el-row :gutter="16" class="mb-7">
@@ -78,7 +82,7 @@ onMounted(async () => {
         <p class="muted mb-3 text-sm">
           Create an organization, then start a project with your team.
         </p>
-        <el-button type="primary" @click="navigateTo('/organizations')"
+        <el-button type="primary" :icon="OfficeBuilding" @click="navigateTo('/organizations')"
           >Create an organization</el-button
         >
       </el-empty>

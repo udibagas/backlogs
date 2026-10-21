@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Plus } from "@element-plus/icons-vue";
 import { z } from "zod";
 
 interface Organization {
@@ -140,6 +141,7 @@ onMounted(load);
         </el-row>
         <el-button
           type="primary"
+          :icon="Plus"
           native-type="submit"
           :loading="pending"
           :disabled="!organizations.length"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Check, Close, Delete, Edit, Grid, List, Plus } from "@element-plus/icons-vue";
 import { ElMessageBox } from "element-plus";
 
 interface Task {
@@ -167,7 +168,7 @@ watch(projectId, load);
           Implementation work connected to the product outcomes it supports.
         </p>
       </div>
-      <el-button type="primary" @click="openCreateTask">+ New task</el-button>
+      <el-button type="primary" :icon="Plus" @click="openCreateTask">New task</el-button>
     </header>
     <el-alert
       v-if="errorMessage && !taskDialogOpen"
@@ -215,8 +216,14 @@ watch(projectId, load);
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="taskDialogOpen = false">Cancel</el-button>
-        <el-button type="primary" native-type="submit" form="task-form" :loading="saving">
+        <el-button :icon="Close" @click="taskDialogOpen = false">Cancel</el-button>
+        <el-button
+          type="primary"
+          :icon="Check"
+          native-type="submit"
+          form="task-form"
+          :loading="saving"
+        >
           {{ editingTaskId ? "Save changes" : "Add task" }}
         </el-button>
       </template>
@@ -236,6 +243,7 @@ watch(projectId, load);
           <el-button-group aria-label="Task display mode">
             <el-button
               :type="displayMode === 'list' ? 'primary' : 'default'"
+              :icon="List"
               :aria-pressed="displayMode === 'list'"
               @click="displayMode = 'list'"
             >
@@ -243,6 +251,7 @@ watch(projectId, load);
             </el-button>
             <el-button
               :type="displayMode === 'board' ? 'primary' : 'default'"
+              :icon="Grid"
               :aria-pressed="displayMode === 'board'"
               @click="displayMode = 'board'"
             >
@@ -293,10 +302,13 @@ watch(projectId, load);
         </el-table-column>
         <el-table-column label="Actions" width="150" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openEditTask(row as Task)">Edit</el-button>
+            <el-button link type="primary" :icon="Edit" @click="openEditTask(row as Task)">
+              Edit
+            </el-button>
             <el-button
               link
               type="danger"
+              :icon="Delete"
               :loading="deletingTaskId === row.id"
               @click="deleteTask(row as Task)"
             >
@@ -352,7 +364,9 @@ watch(projectId, load);
                     :value="status"
                   />
                 </el-select>
-                <el-button link type="primary" @click="openEditTask(task)">Edit</el-button>
+                <el-button link type="primary" :icon="Edit" @click="openEditTask(task)">
+                  Edit
+                </el-button>
               </div>
             </el-card>
             <p v-if="!column.tasks.length" class="muted py-8 text-center text-xs">

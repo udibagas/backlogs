@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Close, Plus, Right } from "@element-plus/icons-vue";
+
 interface Project {
   id: string;
   name: string;
@@ -114,8 +116,11 @@ watch(projectId, load);
             {{ project.description || "Your team's shared space for planning and delivery." }}
           </p>
         </div>
-        <el-button type="primary" @click="navigateTo(`/projects/${project.id}/backlog`)"
-          >Open product backlog →</el-button
+        <el-button
+          type="primary"
+          :icon="Right"
+          @click="navigateTo(`/projects/${project.id}/backlog`)"
+          >Open product backlog</el-button
         >
       </header>
       <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
@@ -187,7 +192,7 @@ watch(projectId, load);
             <el-option label="Developer" value="DEVELOPER" />
             <el-option label="Viewer" value="VIEWER" />
           </el-select>
-          <el-button type="primary" native-type="submit" :loading="memberPending">
+          <el-button type="primary" :icon="Plus" native-type="submit" :loading="memberPending">
             Add member
           </el-button>
         </form>
@@ -211,6 +216,7 @@ watch(projectId, load);
               v-if="canManageMembers && member.userId !== currentUser?.id"
               text
               type="danger"
+              :icon="Close"
               :disabled="memberPending"
               @click="removeMember(member)"
             >

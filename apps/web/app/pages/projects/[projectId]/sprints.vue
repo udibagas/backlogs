@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Check, CircleCheck, Close, Delete, Edit, Plus, VideoPlay } from "@element-plus/icons-vue";
+import { ElMessageBox } from "element-plus";
+
 interface BacklogItem {
   id: string;
   identifier: string;
@@ -122,6 +125,24 @@ async function saveSprint() {
     saving.value = false;
   }
 }
+async function deleteSprint(sprint: Sprint) {
+  errorMessage.value = "";
+  try {
+    await ElMessageBox.confirm(
+      `"${sprint.name}" will be permanently deleted. Its backlog items return to the backlog.`,
+      "Delete Sprint",
+      { type: "warning", confirmButtonText: "Delete", cancelButtonText: "Cancel" }
+    );
+  } catch {
+    return;
+  }
+  try {
+    await request(`/sprints/${sprint.id}`, { method: "DELETE" });
+    await load();
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
+  }
+}
 async function addItem(sprint: Sprint) {
   const backlogItemId = selected.value[sprint.id];
   if (!backlogItemId) return;
@@ -210,7 +231,7 @@ watch(projectId, load);
           Plan a goal together, then select a realistic amount of work.
         </p>
       </div>
-      <el-button type="primary" @click="openCreateSprint">Plan a Sprint</el-button>
+      <el-button type="primary" :icon="Plus" @click="openCreateSprint">Plan a Sprint</el-button>
     </header>
     <el-alert
       v-if="errorMessage && !sprintDialogOpen"
@@ -270,8 +291,14 @@ watch(projectId, load);
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="sprintDialogOpen = false">Cancel</el-button>
-        <el-button type="primary" native-type="submit" form="sprint-form" :loading="saving">
+        <el-button :icon="Close" @click="sprintDialogOpen = false">Cancel</el-button>
+        <el-button
+          type="primary"
+          :icon="Check"
+          native-type="submit"
+          form="sprint-form"
+          :loading="saving"
+        >
           {{ editingSprintId ? "Save changes" : "Create planned Sprint" }}
         </el-button>
       </template>
@@ -304,17 +331,32 @@ watch(projectId, load);
           <div class="flex flex-wrap gap-2">
             <el-button
               v-if="sprint.status === 'PLANNING'"
+              :icon="Edit"
               @click="openEditSprint(sprint)"
               >Edit</el-button
             >
             <el-button
               v-if="sprint.status === 'PLANNING'"
+              type="danger"
+              plain
+              :icon="Delete"
+              @click="deleteSprint(sprint)"
+            >
+              Delete
+            </el-button>
+            <el-button
+              v-if="sprint.status === 'PLANNING'"
               type="primary"
+              :icon="VideoPlay"
               @click="transition(sprint, 'start')"
             >
               Start Sprint
             </el-button>
-            <el-button v-if="sprint.status === 'ACTIVE'" @click="transition(sprint, 'complete')">
+            <el-button
+              v-if="sprint.status === 'ACTIVE'"
+              :icon="CircleCheck"
+              @click="transition(sprint, 'complete')"
+            >
               Complete Sprint
             </el-button>
           </div>
@@ -350,6 +392,7 @@ watch(projectId, load);
                 link
                 type="danger"
                 size="small"
+                :icon="Close"
                 @click="removeItem(sprint, item)"
               >
                 Remove
@@ -380,7 +423,7 @@ watch(projectId, load);
                 :value="item.id"
               />
             </el-select>
-            <el-button :disabled="!selected[sprint.id]" @click="addItem(sprint)">
+            <el-button :icon="Plus" :disabled="!selected[sprint.id]" @click="addItem(sprint)">
               Add item
             </el-button>
           </div>
@@ -446,7 +489,7 @@ watch(projectId, load);
                       placeholder="Capture feedback without treating it as an approved requirement"
                     />
                   </el-form-item>
-                  <el-button native-type="submit">Record event</el-button>
+                  <el-button :icon="Plus" native-type="submit">Record event</el-button>
                 </el-form>
                 <ul v-if="sprint.events.length" class="m-0 mt-4 list-none space-y-3 p-0">
                   <li
@@ -487,7 +530,7 @@ watch(projectId, load);
                     placeholder="What will we try next?"
                     @keyup.enter="addAction(sprint)"
                   />
-                  <el-button @click="addAction(sprint)">Add action</el-button>
+                  <el-button :icon="Plus" @click="addAction(sprint)">Add action</el-button>
                 </div>
                 <ul v-if="sprint.actions.length" class="m-0 mt-4 list-none space-y-2 p-0">
                   <li
