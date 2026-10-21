@@ -58,7 +58,7 @@ async function submit() {
   <div class="flex min-h-screen w-full items-center justify-center px-4 py-10">
     <div class="w-full max-w-md">
       <NuxtLink to="/" class="mb-8 block text-center text-2xl font-bold tracking-tight"
-        >sprintline<span class="text-[var(--el-color-primary)]">.</span></NuxtLink
+        >sprintline<span class="text-(--el-color-primary)">.</span></NuxtLink
       >
       <el-card shadow="never">
         <template #header>
