@@ -14,7 +14,8 @@ import {
   MaxLength,
   Max,
   Matches,
-  Min
+  Min,
+  ValidateIf
 } from "class-validator";
 import { Type } from "class-transformer";
 import {
@@ -25,7 +26,8 @@ import {
   ProjectStatus,
   ProjectRole,
   SprintEventType,
-  TaskStatus
+  TaskStatus,
+  UserRole
 } from "../generated/prisma/client";
 
 export class CreateOrganizationDto {
@@ -38,6 +40,25 @@ export class UpdateOrganizationDto {
   @IsString()
   @Length(2, 100)
   name!: string;
+}
+
+export class UpdateUserDto {
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsString()
+  @Length(2, 100)
+  name?: string;
+
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsEmail()
+  email?: string;
+
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsEnum(UserRole)
+  systemRole?: UserRole;
+
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsBoolean()
+  active?: boolean;
 }
 
 export class CreateProjectDto {

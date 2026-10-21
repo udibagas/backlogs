@@ -13,7 +13,9 @@ import {
   ProjectRole,
   ProjectStatus,
   SprintStatus,
-  TaskStatus
+  TaskStatus,
+  UserRole,
+  Prisma
 } from "../generated/prisma/client";
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
@@ -39,6 +41,7 @@ import type {
   UpdateProjectDto,
   UpdateSprintDto,
   UpdateTaskDto,
+  UpdateUserDto,
   UpdateWorkflowColumnDto
 } from "./core.dto";
 import { createsDependencyCycle, isValidDateRange } from "./core.rules";
@@ -67,6 +70,85 @@ interface UploadedAttachment {
 @Injectable()
 export class CoreService {
   constructor(private readonly prisma: PrismaService) {}
+
+  users() {
+    return this.prisma.user.findMany({
+      orderBy: [{ createdAt: "asc" }, { email: "asc" }],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        systemRole: true,
+        active: true,
+        createdAt: true
+      }
+    });
+  }
+
+  async updateUser(actorId: string, userId: string, dto: UpdateUserDto) {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException("Provide at least one user field to update");
+    }
+    if (actorId === userId && (dto.systemRole !== undefined || dto.active !== undefined)) {
+      throw new BadRequestException("You cannot change your own role or account status");
+    }
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const target = await tx.user.findUnique({ where: { id: userId } });
+          if (!target) throw new NotFoundException("User not found");
+          const willRemoveAdmin =
+            target.systemRole === UserRole.ADMIN &&
+            target.active &&
+            (dto.systemRole === UserRole.USER || dto.active === false);
+          if (willRemoveAdmin) {
+            const activeAdmins = await tx.user.count({
+              where: { systemRole: UserRole.ADMIN, active: true }
+            });
+            if (activeAdmins <= 1) {
+              throw new ConflictException("At least one active system administrator is required");
+            }
+          }
+          if (target.active && dto.active === false) {
+            await tx.refreshSession.updateMany({
+              where: { userId, revokedAt: null },
+              data: { revokedAt: new Date() }
+            });
+          }
+          return tx.user.update({
+            where: { id: userId },
+            data: {
+              ...dto,
+              email: dto.email?.trim().toLowerCase(),
+              name: dto.name?.trim()
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              systemRole: true,
+              active: true,
+              createdAt: true
+            }
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException("An account with this email already exists");
+      }
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: string }).code === "P2034"
+      ) {
+        throw new ConflictException("User roles changed concurrently; reload and try again");
+      }
+      throw error;
+    }
+  }
 
   async organizations(userId: string) {
     return this.prisma.organization.findMany({

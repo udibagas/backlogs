@@ -23,6 +23,7 @@ The app can also be run on Node 22.22.3 or newer. Keep Node, PostgreSQL, and dep
 
 - JWT bearer access tokens kept in Nuxt memory, with opaque refresh tokens in `HttpOnly`, `SameSite=Strict` cookies and hashed, revocable, rotating refresh sessions in PostgreSQL.
 - Registration, login, logout, authenticated profile lookup, request validation, throttling, explicit CORS, and origin validation for state-changing cookie requests.
+- System administrators can manage registered users and account status; the API enforces this role independently of the navigation menu. Set `INITIAL_ADMIN_EMAIL` to an existing account when running the seed command to bootstrap the first system administrator. User invitations require email delivery and are not included.
 - Organization creation and listing; project creation, listing, archiving, registered-user collaboration by email with project roles, Scrum/Kanban methodology, and project-scoped backend authorization.
 - A persistent Product Backlog with project-scoped human-readable IDs, Epic/Story/Bug/Technical Task/Spike types, priorities, story fields, acceptance criteria, estimates, labels, parent links, dependency-cycle prevention, filtering, and soft archiving.
 - Sprint planning, separate Sprint membership, goal/date checks, lifecycle operations, retained Sprint items, review-event and retrospective-action APIs.
@@ -51,7 +52,7 @@ The app can also be run on Node 22.22.3 or newer. Keep Node, PostgreSQL, and dep
 cp .env.example .env
 ```
 
-The demo credentials in `.env.example` are for local development only. Use unique secrets and credentials outside local development.
+The demo credentials in `.env.example` are for local development only. Use unique secrets and credentials outside local development. To bootstrap an administrator, register the account first and set `INITIAL_ADMIN_EMAIL` to its email when running the seed command.
 
 ## Local development
 

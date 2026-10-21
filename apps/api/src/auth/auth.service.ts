@@ -6,10 +6,11 @@ import { createHash, randomBytes } from "node:crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import type { LoginDto, RegisterDto } from "./auth.dto";
 
-const safeUser = (user: { id: string; email: string; name: string }) => ({
+const safeUser = (user: { id: string; email: string; name: string; systemRole: string }) => ({
   id: user.id,
   email: user.email,
-  name: user.name
+  name: user.name,
+  systemRole: user.systemRole
 });
 
 @Injectable()
@@ -27,7 +28,7 @@ export class AuthService {
     const passwordHash = await argon2.hash(dto.password, { type: argon2.argon2id });
     const user = await this.prisma.user.create({
       data: { email, name: dto.name.trim(), passwordHash },
-      select: { id: true, email: true, name: true }
+      select: { id: true, email: true, name: true, systemRole: true }
     });
     return { user, ...(await this.createSession(user)) };
   }
@@ -84,13 +85,18 @@ export class AuthService {
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, createdAt: true }
+      select: { id: true, email: true, name: true, systemRole: true, createdAt: true }
     });
     if (!user) throw new UnauthorizedException("Account is unavailable");
     return user;
   }
 
-  private async createSession(user: { id: string; email: string; name: string }) {
+  private async createSession(user: {
+    id: string;
+    email: string;
+    name: string;
+    systemRole: string;
+  }) {
     const refreshToken = randomBytes(48).toString("base64url");
     const refreshExpiresAt = this.refreshExpiry();
     await this.prisma.refreshSession.create({

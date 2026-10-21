@@ -14,6 +14,11 @@ enum OrganizationRole {
   VIEWER
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 enum ProjectRole {
   MANAGER
   PRODUCT_OWNER
@@ -84,6 +89,7 @@ model User {
   email                   String                   @unique
   name                    String
   passwordHash            String
+  systemRole              UserRole                 @default(USER)
   active                  Boolean                  @default(true)
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt

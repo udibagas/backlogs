@@ -6,6 +6,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { AuthController } from "./auth/auth.controller";
 import { AuthService } from "./auth/auth.service";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
+import { RolesGuard } from "./auth/roles.guard";
 import { CoreController } from "./core/core.controller";
 import { CoreService } from "./core/core.service";
 import { HealthController } from "./health.controller";
@@ -47,6 +48,7 @@ function validateEnvironment(config: Record<string, unknown>) {
     AuthService,
     CoreService,
     JwtAuthGuard,
+    RolesGuard,
     { provide: APP_GUARD, useClass: ThrottlerGuard }
   ]
 })

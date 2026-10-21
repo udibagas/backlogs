@@ -10,7 +10,8 @@ import {
   Priority,
   ProjectRole,
   SprintStatus,
-  TaskStatus
+  TaskStatus,
+  UserRole
 } from "../src/generated/prisma/client";
 
 async function main() {
@@ -33,6 +34,18 @@ async function main() {
       },
       update: {}
     });
+    const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+    if (initialAdminEmail) {
+      const initialAdmin = await prisma.user.updateMany({
+        where: { email: initialAdminEmail },
+        data: { systemRole: UserRole.ADMIN }
+      });
+      if (initialAdmin.count !== 1) {
+        throw new Error(
+          `INITIAL_ADMIN_EMAIL "${initialAdminEmail}" must match an existing account`
+        );
+      }
+    }
     const organization = await prisma.organization.upsert({
       where: { slug: "sprintline-demo" },
       create: { name: "Sprintline Demo", slug: "sprintline-demo" },

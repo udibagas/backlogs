@@ -25,6 +25,8 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../auth/current-user.decorator";
 import type { AuthUser } from "../auth/auth.types";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { Roles } from "../auth/roles.decorator";
+import { RolesGuard } from "../auth/roles.guard";
 import {
   AddProjectMemberDto,
   AddSprintItemDto,
@@ -46,10 +48,11 @@ import {
   UpdateRetrospectiveActionDto,
   UpdateSprintDto,
   UpdateTaskDto,
+  UpdateUserDto,
   UpdateWorkflowColumnDto
 } from "./core.dto";
 import { CoreService } from "./core.service";
-import { BacklogStatus } from "../generated/prisma/client";
+import { BacklogStatus, UserRole } from "../generated/prisma/client";
 
 @ApiTags("Agile workspace")
 @ApiBearerAuth()
@@ -57,6 +60,24 @@ import { BacklogStatus } from "../generated/prisma/client";
 @Controller()
 export class CoreController {
   constructor(private readonly core: CoreService) {}
+
+  @Get("users")
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  users() {
+    return this.core.users();
+  }
+
+  @Patch("users/:userId")
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  updateUser(
+    @CurrentUser() user: AuthUser,
+    @Param("userId") userId: string,
+    @Body() dto: UpdateUserDto
+  ) {
+    return this.core.updateUser(user.sub, userId, dto);
+  }
 
   @Get("organizations")
   organizations(@CurrentUser() user: AuthUser) {

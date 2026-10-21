@@ -1,6 +1,6 @@
 interface SessionResponse {
   accessToken: string;
-  user: { id: string; email: string; name: string };
+  user: { id: string; email: string; name: string; systemRole: "USER" | "ADMIN" };
 }
 
 interface ApiOptions {

@@ -57,6 +57,10 @@ async function logout() {
           <el-icon><el-icon-office-building /></el-icon>
           Organizations
         </el-menu-item>
+        <el-menu-item v-if="currentUser?.systemRole === 'ADMIN'" index="/manage-users">
+          <el-icon><el-icon-user /></el-icon>
+          Manage users
+        </el-menu-item>
         <el-menu-item-group v-if="projectLinks.length" title="Current project">
           <el-menu-item v-for="link in projectLinks" :key="link.to" :index="link.to">
             <el-icon>
