@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  ArrowDown,
   Check,
   CircleCheck,
   Close,
@@ -148,7 +147,8 @@ async function transition(sprint: Sprint, action: "start" | "complete") {
           cancelButtonText: "Cancel",
           inputPlaceholder: "Outcome summary",
           inputType: "textarea",
-          inputValidator: (value) => value.length <= 5000 || "Outcome must be 5000 characters or less."
+          inputValidator: (value) =>
+            value.length <= 5000 || "Outcome must be 5000 characters or less."
         }
       );
       outcome = result.value;
@@ -271,7 +271,7 @@ watch(projectId, load);
         </el-button>
       </template>
     </el-dialog>
-    <el-card shadow="never">
+    <el-card shadow="never" body-style="padding: 0">
       <el-table
         v-loading="loading"
         :data="sprints"
@@ -318,18 +318,15 @@ watch(projectId, load);
             {{ plannedPoints(row as Sprint) }}
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="110" fixed="right" align="right">
+        <el-table-column label="" width="110" fixed="right" align="right">
           <template #default="{ row }">
-            <el-dropdown
-              trigger="click"
-              @command="handleSprintAction(row as Sprint, $event)"
-            >
+            <el-dropdown trigger="click" @command="handleSprintAction(row as Sprint, $event)">
               <el-button
-                :icon="ArrowDown"
+                :icon="ElIconMore"
+                size="small"
                 :loading="processingSprintId === row.id"
                 :aria-label="`Actions for ${row.name}`"
               >
-                Actions
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>

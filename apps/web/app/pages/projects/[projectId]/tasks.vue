@@ -13,15 +13,26 @@ interface Task {
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;
-  assignee: { name: string } | null;
+  assignee: { id: string; name: string } | null;
   backlogItem: { title: string; itemNumber: number } | null;
+}
+interface ProjectMember {
+  userId: string;
+  user: { name: string };
 }
 const route = useRoute();
 const { request } = useApi();
 const projectId = computed(() => String(route.params.projectId));
 const tasks = ref<Task[]>([]);
+const members = ref<ProjectMember[]>([]);
 const displayMode = ref<"list" | "board">("list");
-const form = reactive({ title: "", description: "", priority: "MEDIUM", estimate: "" });
+const form = reactive({
+  title: "",
+  description: "",
+  priority: "MEDIUM",
+  estimate: "",
+  assigneeId: ""
+});
 const taskDialogOpen = ref(false);
 const taskDetailsDialogOpen = ref(false);
 const selectedTask = ref<Task | null>(null);
@@ -88,7 +99,13 @@ function formatDate(value: string | null) {
 function openCreateTask() {
   errorMessage.value = "";
   editingTaskId.value = null;
-  Object.assign(form, { title: "", description: "", priority: "MEDIUM", estimate: "" });
+  Object.assign(form, {
+    title: "",
+    description: "",
+    priority: "MEDIUM",
+    estimate: "",
+    assigneeId: ""
+  });
   taskDialogOpen.value = true;
 }
 
@@ -99,7 +116,8 @@ function openEditTask(task: Task) {
     title: task.title,
     description: task.description,
     priority: task.priority,
-    estimate: task.estimate == null ? "" : String(task.estimate)
+    estimate: task.estimate == null ? "" : String(task.estimate),
+    assigneeId: task.assignee?.id ?? ""
   });
   taskDialogOpen.value = true;
 }
@@ -107,7 +125,12 @@ function openEditTask(task: Task) {
 async function load() {
   loading.value = true;
   try {
-    tasks.value = await request<Task[]>(`/projects/${projectId.value}/tasks`);
+    const [projectTasks, projectMembers] = await Promise.all([
+      request<Task[]>(`/projects/${projectId.value}/tasks`),
+      request<ProjectMember[]>(`/projects/${projectId.value}/members`)
+    ]);
+    tasks.value = projectTasks;
+    members.value = projectMembers;
   } catch (error) {
     errorMessage.value = useErrorMessage(error);
   } finally {
@@ -134,12 +157,19 @@ async function saveTask() {
           title: form.title.trim(),
           description: form.description,
           priority: form.priority,
-          estimate: estimate ?? (editingTaskId.value ? null : undefined)
+          estimate: estimate ?? (editingTaskId.value ? null : undefined),
+          assigneeId: form.assigneeId || null
         }
       }
     );
     if (!editingTaskId.value) {
-      Object.assign(form, { title: "", description: "", priority: "MEDIUM", estimate: "" });
+      Object.assign(form, {
+        title: "",
+        description: "",
+        priority: "MEDIUM",
+        estimate: "",
+        assigneeId: ""
+      });
     }
     editingTaskId.value = null;
     taskDialogOpen.value = false;
@@ -222,11 +252,7 @@ watch(projectId, load);
       <template v-if="selectedTask">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="Status">
-            <el-tag
-              :color="taskStatusColors[selectedTask.status]"
-              effect="dark"
-              class="border-0!"
-            >
+            <el-tag :color="taskStatusColors[selectedTask.status]" effect="dark" class="border-0!">
               {{ selectedTask.status.replaceAll("_", " ").toLowerCase() }}
             </el-tag>
           </el-descriptions-item>
@@ -279,7 +305,7 @@ watch(projectId, load);
               <el-input v-model="form.title" maxlength="240" placeholder="Add automated tests" />
             </el-form-item>
           </el-col>
-          <el-col :md="6" :xs="12">
+          <el-col :md="12" :xs="12">
             <el-form-item label="Priority">
               <el-select v-model="form.priority">
                 <el-option
@@ -291,7 +317,7 @@ watch(projectId, load);
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :md="6" :xs="12">
+          <el-col :md="12" :xs="12">
             <el-form-item label="Estimate (T-shirt size)">
               <el-select v-model="form.estimate" placeholder="Select an estimate" clearable>
                 <el-option
@@ -299,6 +325,24 @@ watch(projectId, load);
                   :key="estimate.size"
                   :label="`${estimate.size} (${estimate.points} ${estimate.points === 1 ? 'point' : 'points'})`"
                   :value="String(estimate.points)"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :md="12" :xs="24">
+            <el-form-item label="Assignee">
+              <el-select
+                v-model="form.assigneeId"
+                class="w-full"
+                placeholder="Unassigned"
+                clearable
+                filterable
+              >
+                <el-option
+                  v-for="member in members"
+                  :key="member.userId"
+                  :label="member.user.name"
+                  :value="member.userId"
                 />
               </el-select>
             </el-form-item>
@@ -373,6 +417,9 @@ watch(projectId, load);
         <el-table-column label="Parent item" min-width="160">
           <template #default="{ row }">{{ row.backlogItem?.title ?? "—" }}</template>
         </el-table-column>
+        <el-table-column label="Assignee" min-width="140">
+          <template #default="{ row }">{{ row.assignee?.name ?? "Unassigned" }}</template>
+        </el-table-column>
         <el-table-column label="Priority" width="110">
           <template #default="{ row }">
             <el-tag size="small" :type="priorityTagType(row.priority)">
@@ -427,7 +474,7 @@ watch(projectId, load);
           </template>
         </el-table-column>
       </el-table>
-      <div v-else v-loading="loading" class="flex gap-4 overflow-x-auto pb-4">
+      <div v-else v-loading="loading" class="flex gap-4 overflow-x-auto p-4">
         <section
           v-for="column in taskColumns"
           :key="column.status"
@@ -457,6 +504,9 @@ watch(projectId, load);
               </p>
               <p class="muted mt-2 truncate text-xs">
                 Parent: {{ task.backlogItem?.title ?? "—" }}
+              </p>
+              <p class="muted mt-1 truncate text-xs">
+                Assignee: {{ task.assignee?.name ?? "Unassigned" }}
               </p>
               <div class="muted mt-2 flex items-center justify-between text-xs">
                 <span>{{ task.priority.toLowerCase() }}</span>
