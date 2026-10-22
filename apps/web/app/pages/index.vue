@@ -59,9 +59,7 @@ onMounted(async () => {
       <el-col :sm="8" :xs="24" class="mb-4">
         <el-card shadow="never">
           <template #header><span class="text-sm font-medium">Tasks tracked</span></template>
-          <el-statistic
-            :value="projects.reduce((sum, project) => sum + project._count.tasks, 0)"
-          />
+          <el-statistic :value="projects.reduce((sum, project) => sum + project._count.tasks, 0)" />
           <p class="muted mt-1 text-xs">Delivery work in the system</p>
         </el-card>
       </el-col>
@@ -73,9 +71,9 @@ onMounted(async () => {
             <h2 class="section-title">Your projects</h2>
             <p class="muted mt-1 text-sm">Jump back into a team's work.</p>
           </div>
-          <el-link type="primary" underline="never" @click="navigateTo('/projects')"
-            >All projects →</el-link
-          >
+          <el-button type="text" @click="navigateTo('/projects')">
+            All projects <el-icon class="el-icon--right"><ElIconRight /></el-icon>
+          </el-button>
         </div>
       </template>
       <el-skeleton v-if="loading" :rows="3" animated />
