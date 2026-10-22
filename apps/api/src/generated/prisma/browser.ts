@@ -89,17 +89,17 @@ export type TaskDependency = Prisma.TaskDependencyModel
 export type WorkflowColumn = Prisma.WorkflowColumnModel
 /**
  * Model Comment
- *
+ * 
  */
 export type Comment = Prisma.CommentModel
 /**
  * Model CommentAttachment
- *
+ * 
  */
 export type CommentAttachment = Prisma.CommentAttachmentModel
 /**
  * Model Activity
- *
+ * 
  */
 export type Activity = Prisma.ActivityModel
 /**
