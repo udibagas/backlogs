@@ -33,6 +33,23 @@ function validateEnvironment(config: Record<string, unknown>) {
   if (config.COOKIE_SECURE !== undefined && !["true", "false"].includes(String(config.COOKIE_SECURE))) {
     throw new Error("COOKIE_SECURE must be true or false");
   }
+  const smtpHost = config.SMTP_HOST;
+  const smtpFrom = config.SMTP_FROM;
+  if (Boolean(smtpHost) !== Boolean(smtpFrom)) {
+    throw new Error("SMTP_HOST and SMTP_FROM must both be configured");
+  }
+  if (smtpHost && config.SMTP_PORT !== undefined) {
+    const smtpPort = Number(config.SMTP_PORT);
+    if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65_535) {
+      throw new Error("SMTP_PORT must be a valid port number");
+    }
+  }
+  if (config.SMTP_SECURE !== undefined && !["true", "false"].includes(String(config.SMTP_SECURE))) {
+    throw new Error("SMTP_SECURE must be true or false");
+  }
+  if (Boolean(config.SMTP_USER) !== Boolean(config.SMTP_PASSWORD)) {
+    throw new Error("SMTP_USER and SMTP_PASSWORD must both be configured");
+  }
   return config;
 }
 

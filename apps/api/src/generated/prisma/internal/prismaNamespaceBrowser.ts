@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   RefreshSession: 'RefreshSession',
+  PasswordResetToken: 'PasswordResetToken',
   Organization: 'Organization',
   OrganizationMembership: 'OrganizationMembership',
   Project: 'Project',
@@ -112,6 +113,18 @@ export const RefreshSessionScalarFieldEnum = {
 } as const
 
 export type RefreshSessionScalarFieldEnum = (typeof RefreshSessionScalarFieldEnum)[keyof typeof RefreshSessionScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const OrganizationScalarFieldEnum = {

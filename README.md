@@ -22,7 +22,7 @@ The app can also be run on Node 22.22.3 or newer. Keep Node, PostgreSQL, and dep
 ## What is implemented
 
 - JWT bearer access tokens kept in Nuxt memory, with opaque refresh tokens in `HttpOnly`, `SameSite=Strict` cookies and hashed, revocable, rotating refresh sessions in PostgreSQL.
-- Registration, login, logout, authenticated profile lookup, request validation, throttling, explicit CORS, and origin validation for state-changing cookie requests.
+- Registration, login, logout, authenticated profile lookup, email-based password reset, request validation, throttling, explicit CORS, and origin validation for state-changing cookie requests.
 - System administrators can manage registered users and account status; the API enforces this role independently of the navigation menu. Set `INITIAL_ADMIN_EMAIL` to an existing account when running the seed command to bootstrap the first system administrator. User invitations require email delivery and are not included.
 - Organization creation and listing; project creation, listing, archiving, registered-user collaboration by email with project roles, Scrum/Kanban methodology, and project-scoped backend authorization.
 - A persistent Product Backlog with project-scoped human-readable IDs, Epic/Story/Bug/Technical Task/Spike types, priorities, story fields, acceptance criteria, estimates, labels, parent links, dependency-cycle prevention, filtering, and soft archiving.
@@ -123,7 +123,8 @@ docker-compose.yml
 ## Production notes and known limitations
 
 - Registration is open. Add an organization policy before deploying where account creation must be restricted.
-- Organization email invitations, email delivery, password reset/change, account deactivation, and organization member administration are not implemented.
+- Configure `SMTP_HOST` and `SMTP_FROM` to enable password-reset email. `SMTP_PORT` defaults to 587; set `SMTP_SECURE=true` for implicit TLS and provide both `SMTP_USER` and `SMTP_PASSWORD` when authentication is required. The link is valid for one hour. Password reset revokes refresh sessions; already-issued access tokens expire naturally.
+- Organization email invitations, password change, account deactivation, and organization member administration are not implemented.
 - Sprint event recording and retrospective action tracking are available in the API, but the current UI does not yet expose every event workflow.
 - Backlog comments and dependency management are API-backed but have limited UI affordances. Acceptance criteria are editable as a set; checking criteria and notifications are not yet implemented.
 - Workflow WIP limits are initialized for local project boards and configurable through the API. Workflow-column reordering and richer transition policies are not yet exposed in the UI.

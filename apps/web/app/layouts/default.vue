@@ -15,7 +15,6 @@ const projectLinks = computed(() =>
     : []
 );
 
-const isLogin = computed(() => route.path === "/login");
 const activePath = computed(() => {
   const path = route.path;
   if (projectId.value) {
@@ -32,12 +31,8 @@ async function logout() {
 </script>
 
 <template>
-  <el-container class="min-h-screen" :class="{ 'flex-col md:flex-row': !isLogin }">
-    <el-aside
-      v-if="!isLogin"
-      width="100%"
-      class="app-aside relative shrink-0 md:min-h-screen md:w-64!"
-    >
+  <el-container class="min-h-screen flex-col md:flex-row">
+    <el-aside width="100%" class="app-aside relative shrink-0 md:min-h-screen md:w-64!">
       <div class="flex items-center justify-between px-5 py-5">
         <NuxtLink to="/" class="text-lg font-bold tracking-tight"
           >sprintline<span class="text-(--el-color-primary)">.</span></NuxtLink

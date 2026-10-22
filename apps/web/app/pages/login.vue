@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: "default" });
+definePageMeta({ layout: "auth" });
 import { Right, UserFilled } from "@element-plus/icons-vue";
 import { z } from "zod";
 
@@ -55,68 +55,65 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex min-h-screen w-full items-center justify-center px-4 py-10">
-    <div class="w-full max-w-md">
-      <NuxtLink to="/" class="mb-8 block text-center text-2xl font-bold tracking-tight"
-        >sprintline<span class="text-(--el-color-primary)">.</span></NuxtLink
-      >
-      <el-card shadow="never">
-        <template #header>
-          <div>
-            <h1 class="text-2xl font-semibold">
-              {{ mode === "login" ? "Welcome back" : "Create your account" }}
-            </h1>
-            <p class="muted mt-2 text-sm">A calm workspace for your team's next increment.</p>
-          </div>
-        </template>
-        <el-form class="mt-7" label-position="top" @submit.prevent="submit">
-          <el-form-item v-if="mode === 'register'" label="Full name">
-            <el-input v-model="name" autocomplete="name" maxlength="100" />
-          </el-form-item>
-          <el-form-item label="Email">
-            <el-input v-model="email" type="email" autocomplete="email" />
-          </el-form-item>
-          <el-form-item label="Password">
-            <el-input
-              v-model="password"
-              type="password"
-              show-password
-              :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
-            />
-            <div v-if="mode === 'register'" class="muted text-xs">Use at least 12 characters.</div>
-          </el-form-item>
-          <el-alert
-            v-if="errorMessage"
-            :title="errorMessage"
-            type="error"
-            :closable="false"
-            show-icon
-            class="mb-4"
-          />
-          <el-button
-            type="primary"
-            :icon="mode === 'login' ? Right : UserFilled"
-            native-type="submit"
-            class="w-full"
-            :loading="pending"
-          >
-            {{ mode === "login" ? "Sign in" : "Create account" }}
-          </el-button>
-        </el-form>
-        <p class="muted mt-6 text-center text-sm">
-          {{ mode === "login" ? "New to Sprintline?" : "Already have an account?" }}
-          <el-link
-            type="primary"
-            underline="never"
-            @click="
-              mode = mode === 'login' ? 'register' : 'login';
-              errorMessage = '';
-            "
-          >
-            {{ mode === "login" ? "Create an account" : "Sign in" }}
-          </el-link>
-        </p>
-      </el-card>
+  <div>
+    <div class="mb-8">
+      <h1 class="text-3xl font-semibold tracking-tight">
+        {{ mode === "login" ? "Welcome back" : "Create your account" }}
+      </h1>
+      <p class="muted mt-2">A calm workspace for your team's next increment.</p>
     </div>
+    <el-form label-position="top" @submit.prevent="submit">
+      <el-form-item v-if="mode === 'register'" label="Full name">
+        <el-input v-model="name" autocomplete="name" maxlength="100" />
+      </el-form-item>
+      <el-form-item label="Email">
+        <el-input v-model="email" type="email" autocomplete="email" />
+      </el-form-item>
+      <el-form-item label="Password">
+        <el-input
+          v-model="password"
+          type="password"
+          show-password
+          :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
+        />
+        <div v-if="mode === 'register'" class="muted text-xs">Use at least 12 characters.</div>
+      </el-form-item>
+      <div v-if="mode === 'login'" class="-mt-3 mb-4 text-right">
+        <NuxtLink to="/forgot-password" class="text-sm text-(--el-color-primary)">
+          Forgot password?
+        </NuxtLink>
+      </div>
+      <el-alert
+        v-if="errorMessage"
+        :title="errorMessage"
+        type="error"
+        :closable="false"
+        show-icon
+        class="mb-4"
+      />
+      <el-button
+        size="large"
+        type="primary"
+        :icon="mode === 'login' ? Right : UserFilled"
+        native-type="submit"
+        class="w-full"
+        :loading="pending"
+      >
+        {{ mode === "login" ? "Sign in" : "Create account" }}
+      </el-button>
+    </el-form>
+    <p class="muted mt-6 text-center text-sm">
+      {{ mode === "login" ? "New to Sprintline?" : "Already have an account?" }}
+      <el-link
+        type="primary"
+        underline="never"
+        @click="
+          mode = mode === 'login' ? 'register' : 'login';
+          errorMessage = '';
+        "
+      >
+        {{ mode === "login" ? "Create an account" : "Sign in" }}
+      </el-link>
+    </p>
   </div>
 </template>

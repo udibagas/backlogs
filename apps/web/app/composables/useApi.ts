@@ -60,6 +60,22 @@ export function useApi() {
     return result.user;
   }
 
+  function requestPasswordReset(email: string) {
+    return raw<{ message: string }>(
+      "/auth/forgot-password",
+      { method: "POST", body: { email } },
+      false
+    );
+  }
+
+  function resetPassword(token: string, password: string) {
+    return raw<{ message: string }>(
+      "/auth/reset-password",
+      { method: "POST", body: { token, password } },
+      false
+    );
+  }
+
   async function ensureSession() {
     if (!accessToken.value && !(await refreshSession())) return false;
     try {
@@ -81,5 +97,13 @@ export function useApi() {
     }
   }
 
-  return { request, signIn, signOut, ensureSession, currentUser };
+  return {
+    request,
+    signIn,
+    requestPasswordReset,
+    resetPassword,
+    signOut,
+    ensureSession,
+    currentUser
+  };
 }

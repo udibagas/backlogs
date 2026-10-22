@@ -209,6 +209,7 @@ export type UserWhereInput = {
   organizationMemberships?: Prisma.OrganizationMembershipListRelationFilter
   projectMemberships?: Prisma.ProjectMembershipListRelationFilter
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   reportedItems?: Prisma.BacklogItemListRelationFilter
   assignedItems?: Prisma.BacklogItemListRelationFilter
   reportedTasks?: Prisma.TaskListRelationFilter
@@ -229,6 +230,7 @@ export type UserOrderByWithRelationInput = {
   organizationMemberships?: Prisma.OrganizationMembershipOrderByRelationAggregateInput
   projectMemberships?: Prisma.ProjectMembershipOrderByRelationAggregateInput
   refreshSessions?: Prisma.RefreshSessionOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   reportedItems?: Prisma.BacklogItemOrderByRelationAggregateInput
   assignedItems?: Prisma.BacklogItemOrderByRelationAggregateInput
   reportedTasks?: Prisma.TaskOrderByRelationAggregateInput
@@ -252,6 +254,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   organizationMemberships?: Prisma.OrganizationMembershipListRelationFilter
   projectMemberships?: Prisma.ProjectMembershipListRelationFilter
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   reportedItems?: Prisma.BacklogItemListRelationFilter
   assignedItems?: Prisma.BacklogItemListRelationFilter
   reportedTasks?: Prisma.TaskListRelationFilter
@@ -300,6 +303,7 @@ export type UserCreateInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -320,6 +324,7 @@ export type UserUncheckedCreateInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -340,6 +345,7 @@ export type UserUpdateInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -360,6 +366,7 @@ export type UserUncheckedUpdateInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -472,6 +479,20 @@ export type UserUpdateOneRequiredWithoutRefreshSessionsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutRefreshSessionsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRefreshSessionsInput, Prisma.UserUpdateWithoutRefreshSessionsInput>, Prisma.UserUncheckedUpdateWithoutRefreshSessionsInput>
+}
+
+export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
 }
 
 export type UserCreateNestedOneWithoutOrganizationMembershipsInput = {
@@ -603,6 +624,7 @@ export type UserCreateWithoutRefreshSessionsInput = {
   updatedAt?: Date | string
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -622,6 +644,7 @@ export type UserUncheckedCreateWithoutRefreshSessionsInput = {
   updatedAt?: Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -657,6 +680,7 @@ export type UserUpdateWithoutRefreshSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -676,6 +700,103 @@ export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
+  assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
+  reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
+  assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthorNestedInput
+  activities?: Prisma.ActivityUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  systemRole?: $Enums.UserRole
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
+  projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
+  assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
+  reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
+  assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthorInput
+  activities?: Prisma.ActivityCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  systemRole?: $Enums.UserRole
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
+  projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
+  assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
+  reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
+  assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthorInput
+  activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpsertWithoutPasswordResetTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  systemRole?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
+  projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
+  assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
+  reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
+  assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthorNestedInput
+  activities?: Prisma.ActivityUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  systemRole?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
+  projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -695,6 +816,7 @@ export type UserCreateWithoutOrganizationMembershipsInput = {
   updatedAt?: Date | string
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -714,6 +836,7 @@ export type UserUncheckedCreateWithoutOrganizationMembershipsInput = {
   updatedAt?: Date | string
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -749,6 +872,7 @@ export type UserUpdateWithoutOrganizationMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -768,6 +892,7 @@ export type UserUncheckedUpdateWithoutOrganizationMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -787,6 +912,7 @@ export type UserCreateWithoutProjectMembershipsInput = {
   updatedAt?: Date | string
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -806,6 +932,7 @@ export type UserUncheckedCreateWithoutProjectMembershipsInput = {
   updatedAt?: Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -841,6 +968,7 @@ export type UserUpdateWithoutProjectMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -860,6 +988,7 @@ export type UserUncheckedUpdateWithoutProjectMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -880,6 +1009,7 @@ export type UserCreateWithoutReportedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -899,6 +1029,7 @@ export type UserUncheckedCreateWithoutReportedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -923,6 +1054,7 @@ export type UserCreateWithoutAssignedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -942,6 +1074,7 @@ export type UserUncheckedCreateWithoutAssignedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -977,6 +1110,7 @@ export type UserUpdateWithoutReportedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -996,6 +1130,7 @@ export type UserUncheckedUpdateWithoutReportedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1026,6 +1161,7 @@ export type UserUpdateWithoutAssignedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -1045,6 +1181,7 @@ export type UserUncheckedUpdateWithoutAssignedItemsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1064,6 +1201,7 @@ export type UserCreateWithoutReportedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -1083,6 +1221,7 @@ export type UserUncheckedCreateWithoutReportedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1107,6 +1246,7 @@ export type UserCreateWithoutAssignedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -1126,6 +1266,7 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -1161,6 +1302,7 @@ export type UserUpdateWithoutReportedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -1180,6 +1322,7 @@ export type UserUncheckedUpdateWithoutReportedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1210,6 +1353,7 @@ export type UserUpdateWithoutAssignedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -1229,6 +1373,7 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -1248,6 +1393,7 @@ export type UserCreateWithoutCommentsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -1267,6 +1413,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -1302,6 +1449,7 @@ export type UserUpdateWithoutCommentsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -1321,6 +1469,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -1340,6 +1489,7 @@ export type UserCreateWithoutActivitiesInput = {
   organizationMemberships?: Prisma.OrganizationMembershipCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskCreateNestedManyWithoutReporterInput
@@ -1359,6 +1509,7 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedCreateNestedManyWithoutUserInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedCreateNestedManyWithoutUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutReporterInput
   assignedItems?: Prisma.BacklogItemUncheckedCreateNestedManyWithoutAssigneeInput
   reportedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutReporterInput
@@ -1394,6 +1545,7 @@ export type UserUpdateWithoutActivitiesInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUpdateManyWithoutReporterNestedInput
@@ -1413,6 +1565,7 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   organizationMemberships?: Prisma.OrganizationMembershipUncheckedUpdateManyWithoutUserNestedInput
   projectMemberships?: Prisma.ProjectMembershipUncheckedUpdateManyWithoutUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutReporterNestedInput
   assignedItems?: Prisma.BacklogItemUncheckedUpdateManyWithoutAssigneeNestedInput
   reportedTasks?: Prisma.TaskUncheckedUpdateManyWithoutReporterNestedInput
@@ -1429,6 +1582,7 @@ export type UserCountOutputType = {
   organizationMemberships: number
   projectMemberships: number
   refreshSessions: number
+  passwordResetTokens: number
   reportedItems: number
   assignedItems: number
   reportedTasks: number
@@ -1441,6 +1595,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   organizationMemberships?: boolean | UserCountOutputTypeCountOrganizationMembershipsArgs
   projectMemberships?: boolean | UserCountOutputTypeCountProjectMembershipsArgs
   refreshSessions?: boolean | UserCountOutputTypeCountRefreshSessionsArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   reportedItems?: boolean | UserCountOutputTypeCountReportedItemsArgs
   assignedItems?: boolean | UserCountOutputTypeCountAssignedItemsArgs
   reportedTasks?: boolean | UserCountOutputTypeCountReportedTasksArgs
@@ -1478,6 +1633,13 @@ export type UserCountOutputTypeCountProjectMembershipsArgs<ExtArgs extends runti
  */
 export type UserCountOutputTypeCountRefreshSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RefreshSessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
 }
 
 /**
@@ -1535,6 +1697,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   organizationMemberships?: boolean | Prisma.User$organizationMembershipsArgs<ExtArgs>
   projectMemberships?: boolean | Prisma.User$projectMembershipsArgs<ExtArgs>
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   reportedItems?: boolean | Prisma.User$reportedItemsArgs<ExtArgs>
   assignedItems?: boolean | Prisma.User$assignedItemsArgs<ExtArgs>
   reportedTasks?: boolean | Prisma.User$reportedTasksArgs<ExtArgs>
@@ -1582,6 +1745,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   organizationMemberships?: boolean | Prisma.User$organizationMembershipsArgs<ExtArgs>
   projectMemberships?: boolean | Prisma.User$projectMembershipsArgs<ExtArgs>
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   reportedItems?: boolean | Prisma.User$reportedItemsArgs<ExtArgs>
   assignedItems?: boolean | Prisma.User$assignedItemsArgs<ExtArgs>
   reportedTasks?: boolean | Prisma.User$reportedTasksArgs<ExtArgs>
@@ -1599,6 +1763,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     organizationMemberships: Prisma.$OrganizationMembershipPayload<ExtArgs>[]
     projectMemberships: Prisma.$ProjectMembershipPayload<ExtArgs>[]
     refreshSessions: Prisma.$RefreshSessionPayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     reportedItems: Prisma.$BacklogItemPayload<ExtArgs>[]
     assignedItems: Prisma.$BacklogItemPayload<ExtArgs>[]
     reportedTasks: Prisma.$TaskPayload<ExtArgs>[]
@@ -2012,6 +2177,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   organizationMemberships<T extends Prisma.User$organizationMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$organizationMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projectMemberships<T extends Prisma.User$projectMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$projectMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refreshSessions<T extends Prisma.User$refreshSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reportedItems<T extends Prisma.User$reportedItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportedItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BacklogItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedItems<T extends Prisma.User$assignedItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BacklogItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reportedTasks<T extends Prisma.User$reportedTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2517,6 +2683,30 @@ export type User$refreshSessionsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.RefreshSessionScalarFieldEnum | Prisma.RefreshSessionScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**

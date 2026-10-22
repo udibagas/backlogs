@@ -96,6 +96,7 @@ model User {
   organizationMemberships OrganizationMembership[]
   projectMemberships      ProjectMembership[]
   refreshSessions         RefreshSession[]
+  passwordResetTokens    PasswordResetToken[]
   reportedItems           BacklogItem[]            @relation("ItemReporter")
   assignedItems           BacklogItem[]            @relation("ItemAssignee")
   reportedTasks           Task[]                   @relation("TaskReporter")
@@ -111,6 +112,18 @@ model RefreshSession {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
   createdAt DateTime  @default(now())
 
   @@index([userId, expiresAt])

@@ -6,7 +6,7 @@ import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
 import type { AuthUser } from "./auth.types";
 import { JwtAuthGuard } from "./jwt-auth.guard";
-import { LoginDto, RegisterDto } from "./auth.dto";
+import { ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from "./auth.dto";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -28,6 +28,20 @@ export class AuthController {
     const result = await this.auth.login(dto);
     this.setRefreshCookie(response, result.refreshToken, result.refreshExpiresAt);
     return { user: result.user, accessToken: result.accessToken };
+  }
+
+  @Post("forgot-password")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @HttpCode(200)
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.auth.forgotPassword(dto);
+  }
+
+  @Post("reset-password")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @HttpCode(200)
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.auth.resetPassword(dto);
   }
 
   @Post("refresh")
