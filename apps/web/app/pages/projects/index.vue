@@ -236,55 +236,50 @@ onMounted(load);
         </el-button>
       </template>
     </el-dialog>
-    <el-card shadow="never">
-      <template #header>
-        <h2 class="section-title">Your projects</h2>
-      </template>
-      <el-skeleton v-if="loading" :rows="3" animated />
-      <el-empty v-else-if="!projects.length" description="No projects yet. Start one to begin." />
-      <div v-else class="grid gap-3 lg:grid-cols-2">
-        <div v-for="project in projects" :key="project.id" class="project-row">
-          <NuxtLink
-            :to="`/projects/${project.id}`"
-            class="flex min-w-0 flex-1 items-center gap-3 no-underline"
-          >
-            <div class="project-mark">{{ project.key.slice(0, 2) }}</div>
-            <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-2">
-                <h3 class="font-semibold">{{ project.name }}</h3>
-                <el-tag size="small" type="info">{{ project.key }}</el-tag>
-              </div>
-              <p class="muted mt-1 text-xs">
-                {{ project.organization.name }} · {{ project.methodology }}
-              </p>
-              <p class="mt-3 text-xs">
-                {{ project._count.backlogItems }} backlog items · {{ project._count.tasks }} tasks
-              </p>
+
+    <el-skeleton v-if="loading" :rows="3" animated />
+    <el-empty v-else-if="!projects.length" description="No projects yet. Start one to begin." />
+    <div v-else class="grid gap-3 lg:grid-cols-2">
+      <div v-for="project in projects" :key="project.id" class="project-row bg-white">
+        <NuxtLink
+          :to="`/projects/${project.id}`"
+          class="flex min-w-0 flex-1 items-center gap-3 no-underline"
+        >
+          <div class="project-mark">{{ project.key.slice(0, 2) }}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="font-semibold">{{ project.name }}</h3>
+              <el-tag size="small" type="info">{{ project.key }}</el-tag>
             </div>
-            <span class="muted" aria-hidden="true">↗</span>
-          </NuxtLink>
-          <el-dropdown v-if="project.canManage" trigger="click">
-            <el-button
-              text
-              :loading="deletingProjectId === project.id"
-              :aria-label="`Actions for ${project.name}`"
-              @click.prevent
-            >
-              Actions
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item :icon="Edit" @click="editProject(project)">
-                  Edit project
-                </el-dropdown-item>
-                <el-dropdown-item :icon="Delete" divided @click="archiveProject(project)">
-                  Archive project
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
+            <p class="muted mt-1 text-xs">
+              {{ project.organization.name }} · {{ project.methodology }}
+            </p>
+            <p class="mt-3 text-xs">
+              {{ project._count.backlogItems }} backlog items · {{ project._count.tasks }} tasks
+            </p>
+          </div>
+          <span class="muted" aria-hidden="true">↗</span>
+        </NuxtLink>
+        <el-dropdown v-if="project.canManage" trigger="click">
+          <el-button
+            text
+            :loading="deletingProjectId === project.id"
+            :aria-label="`Actions for ${project.name}`"
+            @click.prevent
+            :icon="ElIconMore"
+          />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item :icon="Edit" @click="editProject(project)">
+                Edit project
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Delete" divided @click="archiveProject(project)">
+                Archive project
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
-    </el-card>
+    </div>
   </div>
 </template>
