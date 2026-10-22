@@ -53,7 +53,7 @@ watch(projectId, load);
         </p>
       </div>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
     <el-skeleton v-if="loading" :rows="6" animated />
     <template v-else-if="report">
       <el-row :gutter="16" class="mb-3">

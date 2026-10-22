@@ -89,7 +89,7 @@ async function submit() {
         type="error"
         :closable="false"
         show-icon
-        class="mb-4"
+        class="mb-4!"
       />
       <el-button
         size="large"

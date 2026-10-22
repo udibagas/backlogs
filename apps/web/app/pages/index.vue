@@ -38,7 +38,7 @@ onMounted(async () => {
         View projects
       </el-button>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
     <el-row :gutter="16" class="mb-7">
       <el-col :sm="8" :xs="24" class="mb-4">
         <el-card shadow="never">

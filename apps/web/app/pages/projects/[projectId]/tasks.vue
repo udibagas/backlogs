@@ -241,7 +241,7 @@ watch(projectId, load);
       :title="errorMessage"
       type="error"
       show-icon
-      class="mb-5"
+      class="mb-5!"
     />
     <el-dialog
       v-model="taskDetailsDialogOpen"
@@ -297,7 +297,7 @@ watch(projectId, load);
       width="600px"
       append-to-body
     >
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4!" />
       <el-form id="task-form" class="form-stack" label-position="top" @submit.prevent="saveTask">
         <el-row :gutter="12">
           <el-col :md="12" :xs="24">

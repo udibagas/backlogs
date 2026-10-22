@@ -152,7 +152,7 @@ onMounted(load);
       :title="errorMessage"
       type="error"
       show-icon
-      class="mb-5"
+      class="mb-5!"
     />
     <el-dialog
       v-model="projectDialogOpen"
@@ -163,7 +163,7 @@ onMounted(load);
       <p v-if="!editingProject" class="muted mb-5 text-sm">
         Projects keep backlog, delivery, and reporting connected.
       </p>
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4!" />
       <el-form
         id="project-form"
         class="form-stack"
@@ -241,16 +241,9 @@ onMounted(load);
         <h2 class="section-title">Your projects</h2>
       </template>
       <el-skeleton v-if="loading" :rows="3" animated />
-      <el-empty
-        v-else-if="!projects.length"
-        description="No projects yet. Start one to begin."
-      />
+      <el-empty v-else-if="!projects.length" description="No projects yet. Start one to begin." />
       <div v-else class="grid gap-3 lg:grid-cols-2">
-        <div
-          v-for="project in projects"
-          :key="project.id"
-          class="project-row"
-        >
+        <div v-for="project in projects" :key="project.id" class="project-row">
           <NuxtLink
             :to="`/projects/${project.id}`"
             class="flex min-w-0 flex-1 items-center gap-3 no-underline"
@@ -284,11 +277,7 @@ onMounted(load);
                 <el-dropdown-item :icon="Edit" @click="editProject(project)">
                   Edit project
                 </el-dropdown-item>
-                <el-dropdown-item
-                  :icon="Delete"
-                  divided
-                  @click="archiveProject(project)"
-                >
+                <el-dropdown-item :icon="Delete" divided @click="archiveProject(project)">
                   Archive project
                 </el-dropdown-item>
               </el-dropdown-menu>

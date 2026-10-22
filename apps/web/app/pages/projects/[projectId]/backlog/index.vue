@@ -90,7 +90,7 @@ watch(projectId, load);
       </div>
       <el-button type="primary" :icon="Plus" @click="openCreate">New item</el-button>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
     <el-card shadow="never">
       <template #header>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

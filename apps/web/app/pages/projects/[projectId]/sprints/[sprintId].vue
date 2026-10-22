@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  ArrowLeft,
-  Check,
-  Close,
-  Delete,
-  Edit,
-  Plus,
-  VideoPlay
-} from "@element-plus/icons-vue";
+import { ArrowLeft, Check, Close, Delete, Edit, Plus, VideoPlay } from "@element-plus/icons-vue";
 import { ElMessageBox } from "element-plus";
 
 interface BacklogItem {
@@ -87,8 +79,7 @@ const completedPoints = computed(
   () =>
     sprint.value?.items.reduce(
       (sum, item) =>
-        sum +
-        (item.backlogItem.status === "DONE" ? (item.backlogItem.estimate ?? 0) : 0),
+        sum + (item.backlogItem.status === "DONE" ? (item.backlogItem.estimate ?? 0) : 0),
       0
     ) ?? 0
 );
@@ -292,37 +283,21 @@ watch([projectId, sprintId], load);
           <div class="flex flex-wrap items-center gap-3">
             <h1 v-if="sprint" class="page-title">{{ sprint.name }}</h1>
             <h1 v-else class="page-title">Sprint not found</h1>
-            <el-tag v-if="sprint" :type="statusTagType(sprint.status)">{{
-              sprint.status
-            }}</el-tag>
+            <el-tag v-if="sprint" :type="statusTagType(sprint.status)">{{ sprint.status }}</el-tag>
           </div>
           <p v-if="sprint" class="muted mt-2 text-sm">
             {{ formatDate(sprint.startsAt) }} – {{ formatDate(sprint.endsAt) }}
           </p>
         </div>
-        <el-button
-          :icon="ArrowLeft"
-          @click="navigateTo(`/projects/${projectId}/sprints`)"
-        >
+        <el-button :icon="ArrowLeft" @click="navigateTo(`/projects/${projectId}/sprints`)">
           All Sprints
         </el-button>
         <div v-if="sprint?.status === 'PLANNING'" class="flex gap-2">
-          <el-button
-            type="primary"
-            :icon="VideoPlay"
-            :loading="starting"
-            @click="startSprint"
-          >
+          <el-button type="primary" :icon="VideoPlay" :loading="starting" @click="startSprint">
             Start Sprint
           </el-button>
           <el-button :icon="Edit" @click="openEditSprint">Edit</el-button>
-          <el-button
-            type="danger"
-            plain
-            :icon="Delete"
-            :loading="deleting"
-            @click="deleteSprint"
-          >
+          <el-button type="danger" plain :icon="Delete" :loading="deleting" @click="deleteSprint">
             Delete
           </el-button>
         </div>
@@ -333,7 +308,7 @@ watch([projectId, sprintId], load);
         :title="errorMessage"
         type="error"
         show-icon
-        class="mb-5"
+        class="mb-5!"
       />
       <el-empty v-if="!sprint && !errorMessage" description="This Sprint could not be found." />
 
@@ -344,7 +319,7 @@ watch([projectId, sprintId], load);
             :title="errorMessage"
             type="error"
             show-icon
-            class="mb-4"
+            class="mb-4!"
           />
           <el-form
             id="edit-sprint-form"
@@ -441,7 +416,7 @@ watch([projectId, sprintId], load);
               </p>
               <el-alert
                 v-if="sprint.status === 'COMPLETED' && sprint.outcome"
-                class="mt-4"
+                class="mt-4!"
                 title="Sprint outcome"
                 :description="sprint.outcome"
                 type="info"
@@ -452,8 +427,8 @@ watch([projectId, sprintId], load);
             <el-card shadow="never">
               <template #header>
                 <div class="flex items-center justify-between gap-3">
-                <h2 class="section-title">Sprint backlog</h2>
-                <span class="muted text-xs">{{ sprint.items.length }} items</span>
+                  <h2 class="section-title">Sprint backlog</h2>
+                  <span class="muted text-xs">{{ sprint.items.length }} items</span>
                 </div>
               </template>
               <ul v-if="sprint.items.length" class="m-0 list-none p-0">
@@ -469,12 +444,14 @@ watch([projectId, sprintId], load);
                   >
                     {{ item.backlogItem.title }}
                   </NuxtLink>
-                  <el-tag size="small" effect="plain" :type="statusTagType(item.backlogItem.status)">
+                  <el-tag
+                    size="small"
+                    effect="plain"
+                    :type="statusTagType(item.backlogItem.status)"
+                  >
                     {{ item.backlogItem.status.replaceAll("_", " ") }}
                   </el-tag>
-                  <span class="muted text-xs">
-                    {{ item.backlogItem.estimate ?? "—" }} pts
-                  </span>
+                  <span class="muted text-xs"> {{ item.backlogItem.estimate ?? "—" }} pts </span>
                   <el-button
                     v-if="canUpdateBacklog"
                     link
@@ -523,15 +500,11 @@ watch([projectId, sprintId], load);
             <el-card shadow="never">
               <template #header>
                 <div class="flex items-center justify-between gap-3">
-                <h2 class="section-title">Events and notes</h2>
-                <span class="muted text-xs">{{ sprint.events.length }} events</span>
+                  <h2 class="section-title">Events and notes</h2>
+                  <span class="muted text-xs">{{ sprint.events.length }} events</span>
                 </div>
               </template>
-              <el-form
-                class="form-stack mb-5"
-                label-position="top"
-                @submit.prevent="recordEvent"
-              >
+              <el-form class="form-stack mb-5" label-position="top" @submit.prevent="recordEvent">
                 <el-form-item label="Event">
                   <el-select v-model="eventType">
                     <el-option label="Sprint Planning" value="PLANNING" />
@@ -558,12 +531,7 @@ watch([projectId, sprintId], load);
                     placeholder="Capture feedback without treating it as an approved requirement"
                   />
                 </el-form-item>
-                <el-button
-                  type="primary"
-                  :icon="Plus"
-                  native-type="submit"
-                  :loading="savingEvent"
-                >
+                <el-button type="primary" :icon="Plus" native-type="submit" :loading="savingEvent">
                   Record event
                 </el-button>
               </el-form>
@@ -616,13 +584,13 @@ watch([projectId, sprintId], load);
             <el-card shadow="never">
               <template #header>
                 <div class="flex items-center justify-between gap-3">
-                <h2 class="section-title">Retrospective actions</h2>
-                <el-tag size="small" effect="plain">
-                  {{ sprint.actions.filter((action) => action.completedAt).length }}/{{
-                    sprint.actions.length
-                  }}
-                  done
-                </el-tag>
+                  <h2 class="section-title">Retrospective actions</h2>
+                  <el-tag size="small" effect="plain">
+                    {{ sprint.actions.filter((action) => action.completedAt).length }}/{{
+                      sprint.actions.length
+                    }}
+                    done
+                  </el-tag>
                 </div>
               </template>
               <ul v-if="sprint.actions.length" class="m-0 list-none space-y-3 p-0">
@@ -633,15 +601,16 @@ watch([projectId, sprintId], load);
                 >
                   <el-icon
                     class="mt-0.5"
-                    :color="action.completedAt ? 'var(--el-color-success)' : 'var(--el-text-color-placeholder)'"
+                    :color="
+                      action.completedAt
+                        ? 'var(--el-color-success)'
+                        : 'var(--el-text-color-placeholder)'
+                    "
                   >
                     <el-icon-circle-check-filled v-if="action.completedAt" />
                     <el-icon-clock v-else />
                   </el-icon>
-                  <span
-                    :class="{ 'muted line-through': action.completedAt }"
-                    class="min-w-0"
-                  >
+                  <span :class="{ 'muted line-through': action.completedAt }" class="min-w-0">
                     {{ action.description }}
                   </span>
                 </li>

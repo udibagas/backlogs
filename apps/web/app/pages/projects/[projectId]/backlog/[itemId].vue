@@ -350,7 +350,7 @@ watch([projectId, itemId], load);
         :title="errorMessage"
         type="error"
         show-icon
-        class="mb-5"
+        class="mb-5!"
       />
 
       <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -724,7 +724,7 @@ watch([projectId, itemId], load);
       width="600px"
       append-to-body
     >
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4!" />
       <el-form
         id="backlog-item-task-form"
         class="form-stack"

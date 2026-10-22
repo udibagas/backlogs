@@ -145,7 +145,7 @@ async function saveItem() {
     @update:model-value="emit('update:modelValue', $event)"
   >
     <p class="eyebrow">{{ item?.identifier ?? "Product backlog" }}</p>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4!" />
     <el-form class="form-stack" label-position="top" @submit.prevent="saveItem">
       <el-form-item label="Title">
         <el-input v-model="form.title" maxlength="240" />

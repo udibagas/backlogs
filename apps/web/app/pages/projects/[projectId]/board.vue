@@ -116,7 +116,7 @@ watch(projectId, load);
         <el-button type="primary" :icon="Plus" @click="createDialogOpen = true">New item</el-button>
       </div>
     </header>
-    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
+    <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
     <el-skeleton v-if="loading" :rows="6" animated />
     <div
       v-else
@@ -140,7 +140,7 @@ watch(projectId, load);
           type="warning"
           :closable="false"
           show-icon
-          class="mb-2"
+          class="mb-2!"
         />
         <div class="space-y-2">
           <el-card

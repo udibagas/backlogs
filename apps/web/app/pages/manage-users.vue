@@ -81,7 +81,9 @@ async function saveUser() {
       body: {
         ...parsed.data,
         email: parsed.data.email.trim().toLowerCase(),
-        ...(editingUser.value.id === currentUser.value?.id ? {} : { systemRole: parsed.data.systemRole })
+        ...(editingUser.value.id === currentUser.value?.id
+          ? {}
+          : { systemRole: parsed.data.systemRole })
       }
     });
     if (editingUser.value.id === currentUser.value?.id && currentUser.value) {
@@ -152,14 +154,9 @@ onMounted(loadUsers);
       :title="errorMessage"
       type="error"
       show-icon
-      class="mb-5"
+      class="mb-5!"
     />
-    <el-dialog
-      v-model="userDialogOpen"
-      title="Edit user"
-      width="480px"
-      append-to-body
-    >
+    <el-dialog v-model="userDialogOpen" title="Edit user" width="480px" append-to-body>
       <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
       <el-form id="manage-user-form" label-position="top" @submit.prevent="saveUser">
         <el-form-item label="Name">

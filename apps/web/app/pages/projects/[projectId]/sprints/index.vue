@@ -206,7 +206,7 @@ watch(projectId, load);
       :title="errorMessage"
       type="error"
       show-icon
-      class="mb-5"
+      class="mb-5!"
     />
     <el-dialog
       v-model="sprintDialogOpen"
@@ -214,7 +214,7 @@ watch(projectId, load);
       width="600px"
       append-to-body
     >
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4" />
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-4!" />
       <el-form
         id="sprint-form"
         class="form-stack"

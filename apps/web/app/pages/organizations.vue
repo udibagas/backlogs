@@ -113,7 +113,7 @@ onMounted(load);
       :title="errorMessage"
       type="error"
       show-icon
-      class="mb-5"
+      class="mb-5!"
     />
     <el-dialog
       v-model="organizationDialogOpen"

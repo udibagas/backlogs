@@ -75,7 +75,7 @@ async function submit() {
         type="error"
         :closable="false"
         show-icon
-        class="mb-4"
+        class="mb-4!"
       />
       <el-button size="large" type="primary" native-type="submit" class="w-full" :loading="pending">
         Reset password
