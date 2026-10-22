@@ -4,6 +4,20 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-01-01",
   devtools: { enabled: false },
   modules: ["@element-plus/nuxt"],
+  elementPlus: {
+    importStyle: "scss",
+    themeChalk: {
+      $colors: {
+        primary: { base: "rgba(107,33,168, 1)" }
+      },
+      "$border-radius": {
+        base: "8px"
+      },
+      $card: {
+        "border-radius": "8px"
+      }
+    }
+  },
   css: ["~/assets/css/main.css"],
   vite: {
     plugins: [tailwindcss()],
