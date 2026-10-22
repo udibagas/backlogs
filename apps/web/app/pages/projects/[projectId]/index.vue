@@ -123,8 +123,8 @@ watch(projectId, load);
           >Open product backlog</el-button
         >
       </header>
-      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5" />
-      <el-row :gutter="16" class="mb-7">
+      <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
+      <el-row :gutter="16" class="mb-4">
         <el-col :sm="8" :xs="24" class="mb-4">
           <el-card shadow="never">
             <template #header><span class="text-sm font-medium">Open backlog</span></template>
@@ -175,7 +175,7 @@ watch(projectId, load);
             <el-tag type="info">{{ members.length }} members</el-tag>
           </div>
         </template>
-        <el-alert v-if="memberError" :title="memberError" type="error" show-icon class="mb-4" />
+        <el-alert v-if="memberError" :title="memberError" type="error" show-icon class="mb-4!" />
         <form
           v-if="canManageMembers"
           class="mb-5 flex flex-col gap-3 sm:flex-row"
@@ -188,6 +188,7 @@ watch(projectId, load);
             placeholder="Add an existing user by email"
             aria-label="Collaborator email"
             class="flex-1"
+            :prefix-icon="ElIconMessage"
           />
           <el-select v-model="memberRole" aria-label="Project role" class="sm:w-48!">
             <el-option label="Manager" value="MANAGER" />
