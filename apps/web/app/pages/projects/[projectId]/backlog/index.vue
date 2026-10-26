@@ -178,7 +178,9 @@ watch(projectId, load);
             placeholder="Filter status"
             aria-label="Filter by status"
           >
-            <template #prefix><el-icon><Filter /></el-icon></template>
+            <template #prefix
+              ><el-icon><Filter /></el-icon
+            ></template>
             <el-option
               v-for="status in statuses"
               :key="status"
@@ -191,7 +193,12 @@ watch(projectId, load);
           </el-button>
         </div>
       </template>
-      <el-table v-loading="loading" :data="displayItems" class="backlog-table" height="calc(100vh - 360px)">
+      <el-table
+        v-loading="loading"
+        :data="displayItems"
+        class="backlog-table"
+        height="calc(100vh - 360px)"
+      >
         <template #empty>
           <el-empty description="Nothing in the backlog yet">
             <p class="muted mb-3 text-sm">Capture an Epic, User Story, Bug, Task, or Spike.</p>
@@ -210,7 +217,12 @@ watch(projectId, load);
                 >
                   {{ row.identifier }}
                 </NuxtLink>
-                <span class="font-semibold">{{ row.title }}</span>
+                <span
+                  class="font-semibold cursor-pointer"
+                  @click="navigateTo(`/projects/${projectId}/backlog/${row.id}`)"
+                >
+                  {{ row.title }}
+                </span>
               </div>
               <p v-if="row.description" class="muted mt-1 line-clamp-1 max-w-md text-xs">
                 {{ row.description }}
@@ -218,16 +230,19 @@ watch(projectId, load);
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Type" width="110">
+        <el-table-column label="Type" width="150" align="center">
           <template #default="{ row }">
             <span class="pill" :class="typeClasses[row.type] ?? 'bg-gray-100 text-gray-600'">
               {{ row.type.replaceAll("_", " ") }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="Priority" width="120">
+        <el-table-column label="Priority" width="120" align="center">
           <template #default="{ row }">
-            <span class="pill" :class="priorityClasses[row.priority] ?? 'bg-gray-100 text-gray-600'">
+            <span
+              class="pill"
+              :class="priorityClasses[row.priority] ?? 'bg-gray-100 text-gray-600'"
+            >
               {{ row.priority }}
             </span>
           </template>
