@@ -201,11 +201,7 @@ watch(projectId, load);
             Add member
           </el-button>
         </form>
-        <div
-          v-if="members.length"
-          class="divide-y"
-          style="border-color: var(--el-border-color-lighter)"
-        >
+        <div v-if="members.length" class="divide-y divide-gray-200 dark:divide-gray-700">
           <div
             v-for="member in members"
             :key="member.id"
@@ -234,7 +230,7 @@ watch(projectId, load);
       <div class="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
         <el-card shadow="never">
           <template #header>
-            <div class="flex items-start justify-between">
+            <div class="flex items-center justify-between">
               <div>
                 <h2 class="section-title">Work by status</h2>
                 <p class="muted mt-1 text-sm">Live counts from the Product Backlog.</p>
@@ -243,8 +239,9 @@ watch(projectId, load);
                 type="primary"
                 underline="never"
                 @click="navigateTo(`/projects/${project.id}/board`)"
-                >View board →</el-link
               >
+                View board →
+              </el-link>
             </div>
           </template>
           <div v-if="report?.backlogByStatus.length" class="space-y-4">
