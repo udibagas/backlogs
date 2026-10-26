@@ -1,6 +1,12 @@
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: "Sprintline - Project Management"
+      // link: [{ rel: "icon", type: "image/x-icon", href: "/images/logo.png" }]
+    }
+  },
   compatibilityDate: "2025-01-01",
   devtools: { enabled: false },
   modules: ["@element-plus/nuxt"],
