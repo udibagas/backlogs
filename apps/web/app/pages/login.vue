@@ -63,13 +63,13 @@ async function submit() {
       <p class="muted mt-2">A calm workspace for your team's next increment.</p>
     </div>
     <el-form label-position="top" @submit.prevent="submit">
-      <el-form-item v-if="mode === 'register'" label="Full name">
+      <el-form-item size="large" v-if="mode === 'register'" label="Full name">
         <el-input v-model="name" autocomplete="name" maxlength="100" />
       </el-form-item>
-      <el-form-item label="Email">
+      <el-form-item size="large" label="Email">
         <el-input v-model="email" type="email" autocomplete="email" />
       </el-form-item>
-      <el-form-item label="Password">
+      <el-form-item size="large" label="Password">
         <el-input
           v-model="password"
           type="password"
