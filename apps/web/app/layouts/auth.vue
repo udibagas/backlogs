@@ -53,7 +53,7 @@ const highlights = [
 
 <style scoped>
 .auth-brand {
-  background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+  background: linear-gradient(145deg, #1e102a 0%, #4c1d95 60%, #6b21a8 100%);
 }
 .auth-glow {
   position: absolute;
