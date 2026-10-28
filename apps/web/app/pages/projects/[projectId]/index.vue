@@ -52,6 +52,14 @@ const canManageMembers = computed(() =>
   ["MANAGER", "PRODUCT_OWNER", "SCRUM_MASTER"].includes(project.value?.currentRole ?? "")
 );
 
+function memberAvatarColor(member: ProjectMember) {
+  let hash = 0;
+  for (const character of member.userId) {
+    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  }
+  return `hsl(${hash % 360} 65% 45%)`;
+}
+
 async function load() {
   loading.value = true;
   try {
@@ -207,7 +215,9 @@ watch(projectId, load);
             :key="member.id"
             class="flex flex-wrap items-center gap-3 py-3"
           >
-            <el-avatar :size="36">{{ member.user.name.slice(0, 1).toUpperCase() }}</el-avatar>
+            <el-avatar :size="36" :style="{ backgroundColor: memberAvatarColor(member) }">
+              {{ member.user.name.slice(0, 1).toUpperCase() }}
+            </el-avatar>
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium">{{ member.user.name }}</p>
               <p class="muted truncate text-xs">{{ member.user.email }}</p>
