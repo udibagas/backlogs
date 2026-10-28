@@ -162,10 +162,11 @@ watch(projectId, load);
               </div>
             </template>
             <NuxtLink
-              :to="`/projects/${projectId}/backlog`"
+              :to="`/projects/${projectId}/backlog/${card.id}`"
               class="mt-2 block text-sm font-medium leading-snug"
-              >{{ card.title }}</NuxtLink
             >
+              {{ card.title }}
+            </NuxtLink>
             <el-text
               v-if="card.dependencies.some((dependency) => dependency.dependsOn.status !== 'DONE')"
               type="warning"
