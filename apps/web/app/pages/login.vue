@@ -64,14 +64,28 @@ async function submit() {
     </div>
     <el-form label-position="top" @submit.prevent="submit">
       <el-form-item size="large" v-if="mode === 'register'" label="Full name">
-        <el-input v-model="name" autocomplete="name" maxlength="100" />
+        <el-input
+          placeholder="Full name"
+          :prefix-icon="ElIconUser"
+          v-model="name"
+          autocomplete="name"
+          maxlength="100"
+        />
       </el-form-item>
       <el-form-item size="large" label="Email">
-        <el-input v-model="email" type="email" autocomplete="email" />
+        <el-input
+          placeholder="email@example.com"
+          :prefix-icon="ElIconMessage"
+          v-model="email"
+          type="email"
+          autocomplete="email"
+        />
       </el-form-item>
       <el-form-item size="large" label="Password">
         <el-input
+          placeholder="Type your password"
           v-model="password"
+          :prefix-icon="ElIconLock"
           type="password"
           show-password
           :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
@@ -102,7 +116,7 @@ async function submit() {
         {{ mode === "login" ? "Sign in" : "Create account" }}
       </el-button>
     </el-form>
-    <p class="muted mt-6 text-center text-sm">
+    <p class="muted mt-6 text-center text-sm flex items-center justify-center gap-2">
       {{ mode === "login" ? "New to Sprintline?" : "Already have an account?" }}
       <el-link
         type="primary"
