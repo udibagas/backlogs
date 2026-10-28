@@ -17,9 +17,12 @@ export default defineNuxtConfig({
         primary: { base: "rgba(107,33,168, 1)" }
       },
       "$border-radius": {
-        base: "8px"
+        base: "16px"
       },
       $card: {
+        "border-radius": "8px"
+      },
+      $messagebox: {
         "border-radius": "8px"
       }
     }
