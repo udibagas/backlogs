@@ -71,7 +71,7 @@ onMounted(async () => {
             <h2 class="section-title">Your projects</h2>
             <p class="muted mt-1 text-sm">Jump back into a team's work.</p>
           </div>
-          <el-button type="text" @click="navigateTo('/projects')">
+          <el-button link @click="navigateTo('/projects')">
             All projects <el-icon class="el-icon--right"><ElIconRight /></el-icon>
           </el-button>
         </div>
