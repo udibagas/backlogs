@@ -72,27 +72,71 @@ async function load() {
     loading.value = false;
   }
 }
-function dragStart(event: DragEvent, itemId: string) {
-  event.dataTransfer?.setData("text/plain", itemId);
+const draggingCard = ref<Card | null>(null);
+const dragSourceStatus = ref<string | null>(null);
+const overStatus = ref<string | null>(null);
+
+function dragStart(event: DragEvent, card: Card, status: string) {
+  event.dataTransfer?.setData("text/plain", card.id);
   if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+  // Defer so the browser snapshots the drag image before the card is dimmed.
+  requestAnimationFrame(() => {
+    draggingCard.value = card;
+    dragSourceStatus.value = status;
+  });
 }
-async function move(itemId: string, status: string) {
+function dragEnd() {
+  draggingCard.value = null;
+  dragSourceStatus.value = null;
+  overStatus.value = null;
+}
+function dragOver(event: DragEvent, status: string) {
+  if (!draggingCard.value) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+  overStatus.value = status;
+}
+function dragLeave(event: DragEvent, status: string) {
+  const next = event.relatedTarget as Node | null;
+  if (next && (event.currentTarget as Node).contains(next)) return;
+  if (overStatus.value === status) overStatus.value = null;
+}
+function showPlaceholder(status: string) {
+  return !!draggingCard.value && overStatus.value === status && dragSourceStatus.value !== status;
+}
+async function move(card: Card, status: string) {
   errorMessage.value = "";
+  const from = columns.value.find((c) => c.cards.some((x) => x.id === card.id));
+  const to = columns.value.find((c) => c.status === status);
+  if (!from || !to || from === to) return;
+  // Optimistic update so the card lands instantly.
+  from.cards = from.cards.filter((x) => x.id !== card.id);
+  from.count = Math.max(0, from.count - 1);
+  to.cards = [...to.cards, { ...card, status }];
+  to.count += 1;
   try {
-    await request(`/backlog-items/${itemId}/status`, { method: "PATCH", body: { status } });
-    await load();
+    await request(`/backlog-items/${card.id}/status`, { method: "PATCH", body: { status } });
+    await refresh();
   } catch (error) {
     errorMessage.value = useErrorMessage(
       error,
       "The card could not be moved. The board has been refreshed."
     );
-    await load();
+    await refresh();
+  }
+}
+async function refresh() {
+  try {
+    columns.value = await request<Column[]>(`/projects/${projectId.value}/board`);
+  } catch (error) {
+    errorMessage.value = useErrorMessage(error);
   }
 }
 function drop(event: DragEvent, status: string) {
   event.preventDefault();
-  const itemId = event.dataTransfer?.getData("text/plain");
-  if (itemId) void move(itemId, status);
+  const card = draggingCard.value;
+  dragEnd();
+  if (card) void move(card, status);
 }
 onMounted(load);
 watch(projectId, load);
@@ -118,16 +162,14 @@ watch(projectId, load);
     </header>
     <el-alert v-if="errorMessage" :title="errorMessage" type="error" show-icon class="mb-5!" />
     <el-skeleton v-if="loading" :rows="6" animated />
-    <div
-      v-else
-      class="grid gap-4 overflow-x-auto pb-4 xl:grid-cols-6 lg:grid-cols-3 sm:grid-cols-2"
-    >
+    <div v-else class="flex gap-4 overflow-x-auto pb-4">
       <section
         v-for="column in columns"
         :key="column.id"
-        class="min-w-64 rounded-lg p-3"
+        class="min-w-64 rounded-lg p-3 transition-colors duration-150"
         :style="columnStyle(column.status)"
-        @dragover.prevent
+        @dragover="dragOver($event, column.status)"
+        @dragleave="dragLeave($event, column.status)"
         @drop="drop($event, column.status)"
       >
         <header class="mb-3 flex items-center justify-between gap-2 px-1">
@@ -149,18 +191,19 @@ watch(projectId, load);
             shadow="hover"
             :body-style="{ padding: '12px' }"
             draggable="true"
-            @dragstart="dragStart($event, card.id)"
+            class="cursor-grab transition-opacity duration-150 active:cursor-grabbing"
+            :class="{ 'opacity-40': draggingCard?.id === card.id }"
+            @dragstart="dragStart($event, card, column.status)"
+            @dragend="dragEnd"
           >
-            <template #header>
-              <div class="flex items-start justify-between gap-2">
-                <span class="text-[11px] font-semibold" style="color: var(--el-color-primary)">{{
-                  card.identifier
-                }}</span>
-                <el-tag size="small" type="info">{{
-                  card.type.replaceAll("_", " ").toLowerCase()
-                }}</el-tag>
-              </div>
-            </template>
+            <div class="flex items-start justify-between gap-2">
+              <span class="text-[11px] font-semibold" style="color: var(--el-color-primary)">{{
+                card.identifier
+              }}</span>
+              <el-tag size="small" type="warning" effect="plain">
+                {{ card.type.replaceAll("_", " ").toLowerCase() }}
+              </el-tag>
+            </div>
             <NuxtLink
               :to="`/projects/${projectId}/backlog/${card.id}`"
               class="mt-2 block text-sm font-medium leading-snug"
@@ -179,7 +222,7 @@ watch(projectId, load);
               <span>{{ card.assignee?.name ?? "Unassigned" }}</span>
               <span>{{ card.estimate ?? "—" }} pts</span>
             </div>
-            <el-select
+            <!-- <el-select
               :model-value="card.status"
               size="small"
               class="mt-3"
@@ -192,9 +235,20 @@ watch(projectId, load);
                 :label="option.name"
                 :value="option.status"
               />
-            </el-select>
+            </el-select> -->
           </el-card>
-          <p v-if="!column.cards.length" class="muted py-8 text-center text-xs">Drop work here</p>
+          <div
+            v-if="showPlaceholder(column.status)"
+            class="flex h-20 items-center justify-center rounded-lg border-2 border-dashed text-xs"
+            style="
+              border-color: var(--el-color-primary);
+              color: var(--el-color-primary);
+              background: var(--el-color-primary-light-9);
+            "
+          >
+            Drop here
+          </div>
+          <p v-if="!column.cards.length && !showPlaceholder(column.status)" class="muted py-8 text-center text-xs">Drop work here</p>
         </div>
       </section>
     </div>
