@@ -210,15 +210,44 @@ async function deleteTask(task: Task) {
     deletingTaskId.value = null;
   }
 }
+const draggingTaskId = ref<string | null>(null);
+const dragOverStatus = ref<string | null>(null);
+const draggingTask = computed(() => tasks.value.find((t) => t.id === draggingTaskId.value));
 function dragStart(event: DragEvent, taskId: string) {
   event.dataTransfer?.setData("text/plain", taskId);
   if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+  // defer so the drag image is captured before the card fades
+  requestAnimationFrame(() => (draggingTaskId.value = taskId));
 }
-function dropTask(event: DragEvent, status: string) {
+function dragEnd() {
+  draggingTaskId.value = null;
+  dragOverStatus.value = null;
+}
+function dragOver(event: DragEvent, status: string) {
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+  dragOverStatus.value = status;
+}
+function dragLeave(event: DragEvent, status: string) {
+  const next = event.relatedTarget as Node | null;
+  if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+  if (dragOverStatus.value === status) dragOverStatus.value = null;
+}
+async function dropTask(event: DragEvent, status: string) {
   event.preventDefault();
   const taskId = event.dataTransfer?.getData("text/plain");
+  dragEnd();
   const task = tasks.value.find((candidate) => candidate.id === taskId);
-  if (task && task.status !== status) void updateStatus(task, status);
+  if (!task || task.status === status) return;
+  const previous = task.status;
+  task.status = status as Task["status"];
+  errorMessage.value = "";
+  try {
+    await request(`/tasks/${task.id}`, { method: "PATCH", body: { status } });
+  } catch (error) {
+    task.status = previous;
+    errorMessage.value = useErrorMessage(error);
+  }
 }
 onMounted(load);
 watch(projectId, load);
@@ -478,9 +507,10 @@ watch(projectId, load);
         <section
           v-for="column in taskColumns"
           :key="column.status"
-          class="min-w-64 rounded-lg border p-3"
+          class="min-w-64 rounded-lg border p-3 transition-colors duration-150"
           :style="taskColumnStyle(column.status)"
-          @dragover.prevent
+          @dragover="dragOver($event, column.status)"
+          @dragleave="dragLeave($event, column.status)"
           @drop="dropTask($event, column.status)"
         >
           <header class="mb-3 flex items-center justify-between gap-2 px-1">
@@ -494,11 +524,12 @@ watch(projectId, load);
               shadow="hover"
               :body-style="{ padding: '12px' }"
               draggable="true"
+              class="task-card"
+              :class="{ 'is-dragging': draggingTaskId === task.id }"
               @dragstart="dragStart($event, task.id)"
+              @dragend="dragEnd"
             >
-              <template #header>
-                <p class="text-sm font-medium">{{ task.title }}</p>
-              </template>
+              <p class="text-sm font-medium">{{ task.title }}</p>
               <p v-if="task.description" class="muted mt-1 line-clamp-2 text-xs">
                 {{ task.description }}
               </p>
@@ -540,7 +571,15 @@ watch(projectId, load);
                 </el-button>
               </div>
             </el-card>
-            <p v-if="!column.tasks.length" class="muted py-8 text-center text-xs">
+            <div
+              v-if="draggingTask && dragOverStatus === column.status && draggingTask.status !== column.status"
+              class="drop-placeholder"
+            >
+              Drop here
+            </div>
+            <p
+              v-else-if="!column.tasks.length"
+              class="muted py-8 text-center text-xs">
               Drop tasks here
             </p>
           </div>
@@ -552,3 +591,35 @@ watch(projectId, load);
     </el-card>
   </div>
 </template>
+
+<style scoped>
+.task-card {
+  cursor: grab;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.task-card:active {
+  cursor: grabbing;
+}
+.task-card.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.97);
+}
+.drop-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  border: 2px dashed var(--el-color-primary);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--el-color-primary) 8%, transparent);
+  color: var(--el-color-primary);
+  font-size: 12px;
+  animation: placeholder-in 0.15s ease;
+}
+@keyframes placeholder-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+</style>

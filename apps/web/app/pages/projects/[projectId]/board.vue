@@ -222,12 +222,12 @@ watch(projectId, load);
               <span>{{ card.assignee?.name ?? "Unassigned" }}</span>
               <span>{{ card.estimate ?? "—" }} pts</span>
             </div>
-            <!-- <el-select
+            <el-select
               :model-value="card.status"
               size="small"
               class="mt-3"
               :aria-label="`Move ${card.identifier} to another status`"
-              @change="move(card.id, $event as string)"
+              @change="move(card, $event as string)"
             >
               <el-option
                 v-for="option in columns"
@@ -235,7 +235,7 @@ watch(projectId, load);
                 :label="option.name"
                 :value="option.status"
               />
-            </el-select> -->
+            </el-select>
           </el-card>
           <div
             v-if="showPlaceholder(column.status)"
@@ -248,7 +248,12 @@ watch(projectId, load);
           >
             Drop here
           </div>
-          <p v-if="!column.cards.length && !showPlaceholder(column.status)" class="muted py-8 text-center text-xs">Drop work here</p>
+          <p
+            v-if="!column.cards.length && !showPlaceholder(column.status)"
+            class="muted py-8 text-center text-xs"
+          >
+            Drop work here
+          </p>
         </div>
       </section>
     </div>
