@@ -24,6 +24,14 @@ const activePath = computed(() => {
   return path === "/" ? "/" : "/" + path.split("/")[1];
 });
 
+function userAvatarColor(userId: string) {
+  let hash = 0;
+  for (const character of userId) {
+    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  }
+  return `hsl(${hash % 360} 65% 45%)`;
+}
+
 async function logout() {
   await signOut();
   await navigateTo("/login");
@@ -71,10 +79,14 @@ async function logout() {
         </el-menu-item-group>
       </el-menu>
       <div class="app-user p-4 md:absolute md:bottom-0 md:w-full">
-        <div class="flex items-center gap-3">
-          <el-avatar :size="36">{{
-            currentUser?.name?.slice(0, 1).toUpperCase() || "U"
-          }}</el-avatar>
+        <div class="app-user-card flex items-center gap-3 rounded-xl p-3">
+          <el-avatar
+            :size="40"
+            class="shrink-0"
+            :style="currentUser ? { backgroundColor: userAvatarColor(currentUser.id) } : undefined"
+          >
+            {{ currentUser?.name?.slice(0, 1).toUpperCase() || "U" }}
+          </el-avatar>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-medium">{{ currentUser?.name || "Your account" }}</p>
             <el-link type="info" underline="never" @click="logout">Sign out</el-link>
@@ -82,7 +94,7 @@ async function logout() {
         </div>
       </div>
     </el-aside>
-    <el-main class="min-w-0 flex-1 p-0!">
+    <el-main class="min-w-0 max-h-screen flex-1 p-0!">
       <slot />
     </el-main>
   </el-container>
@@ -100,5 +112,8 @@ async function logout() {
 }
 .app-user {
   border-top: 1px solid var(--el-border-color-lighter);
+}
+.app-user-card {
+  background: var(--el-fill-color-light);
 }
 </style>
